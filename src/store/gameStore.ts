@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Monster, Egg } from '@/types';
+import { Monster, Egg, Gender } from '@/types';
 import { getSpecies } from '@/data/species';
 import {
   COOLDOWNS,
@@ -10,10 +10,11 @@ import {
   TRAIN_EXP,
   TRAIN_AFFECTION,
   addExp,
-  canBreed,
+  canBreedPair,
   clampAffection,
   determineChildSpeciesId,
   inheritIVs,
+  randomGender,
   randomIVs,
 } from '@/game/logic';
 
@@ -23,6 +24,7 @@ function genId(prefix: string): string {
 
 function createMonster(params: {
   speciesId: string;
+  gender: Gender;
   generation: number;
   parentIds?: [string, string];
   ivs?: Monster['ivs'];
@@ -32,6 +34,7 @@ function createMonster(params: {
     id: genId('mon'),
     speciesId: params.speciesId,
     nickname: species.name,
+    gender: params.gender,
     level: 1,
     exp: 0,
     ivs: params.ivs ?? randomIVs(),
@@ -55,7 +58,7 @@ interface GameState {
   monsters: Record<string, Monster>;
   eggs: Record<string, Egg>;
   hasStarter: boolean;
-  chooseStarter: (speciesId: string) => void;
+  chooseStarter: (speciesId: string, gender: Gender) => void;
   renameMonster: (id: string, nickname: string) => void;
   feedMonster: (id: string) => ActionResult;
   trainMonster: (id: string) => ActionResult;
@@ -70,9 +73,9 @@ export const useGameStore = create<GameState>()(
       eggs: {},
       hasStarter: false,
 
-      chooseStarter: (speciesId) => {
+      chooseStarter: (speciesId, gender) => {
         if (get().hasStarter) return;
-        const monster = createMonster({ speciesId, generation: 1 });
+        const monster = createMonster({ speciesId, gender, generation: 1 });
         set((state) => ({
           monsters: { ...state.monsters, [monster.id]: monster },
           hasStarter: true,
@@ -148,15 +151,12 @@ export const useGameStore = create<GameState>()(
 
       breedMonsters: (idA, idB) => {
         const now = Date.now();
-        if (idA === idB) return { ok: false, message: '同じモンスター同士は交配できません' };
         const { monsters } = get();
         const a = monsters[idA];
         const b = monsters[idB];
         if (!a || !b) return { ok: false, message: 'モンスターが見つかりません' };
-        const checkA = canBreed(a, now);
-        if (!checkA.ok) return { ok: false, message: `${a.nickname}: ${checkA.reason}` };
-        const checkB = canBreed(b, now);
-        if (!checkB.ok) return { ok: false, message: `${b.nickname}: ${checkB.reason}` };
+        const check = canBreedPair(a, b, now);
+        if (!check.ok) return { ok: false, message: check.reason ?? '交配できません' };
 
         const childSpeciesId = determineChildSpeciesId(a.speciesId, b.speciesId);
         const childIvs = inheritIVs(a.ivs, b.ivs);
@@ -165,6 +165,7 @@ export const useGameStore = create<GameState>()(
           id: genId('egg'),
           parentIds: [idA, idB],
           speciesId: childSpeciesId,
+          gender: randomGender(),
           ivs: childIvs,
           generation,
           createdAt: now,
@@ -191,6 +192,7 @@ export const useGameStore = create<GameState>()(
         }
         const monster = createMonster({
           speciesId: egg.speciesId,
+          gender: egg.gender,
           generation: egg.generation,
           parentIds: egg.parentIds,
           ivs: egg.ivs,

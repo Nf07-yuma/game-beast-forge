@@ -12,6 +12,8 @@ export const theme = {
     success: '#5FBF63',
     danger: '#E0554F',
     heart: '#F0668C',
+    male: '#4EA1F0',
+    female: '#F0669E',
   },
   radius: {
     sm: 8,
@@ -28,4 +30,14 @@ export const ELEMENT_LABELS: Record<string, string> = {
   electric: '電',
   rock: '岩',
   mystic: '神秘',
+};
+
+export const GENDER_SYMBOLS: Record<string, string> = {
+  male: '♂',
+  female: '♀',
+};
+
+export const GENDER_LABELS: Record<string, string> = {
+  male: 'オス',
+  female: 'メス',
 };

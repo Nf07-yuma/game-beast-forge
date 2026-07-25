@@ -9,7 +9,7 @@ import { MonsterAvatar } from '@/components/MonsterAvatar';
 import { ProgressBar } from '@/components/ProgressBar';
 import { StatBar } from '@/components/StatBar';
 import { PrimaryButton } from '@/components/PrimaryButton';
-import { theme, ELEMENT_LABELS } from '@/theme';
+import { theme, ELEMENT_LABELS, GENDER_SYMBOLS } from '@/theme';
 
 const STAT_DISPLAY_MAX = 60;
 
@@ -80,7 +80,15 @@ export default function MonsterDetailScreen() {
           />
         ) : (
           <Text style={styles.name} onPress={() => setEditingName(true)}>
-            {monster.nickname} ✎
+            {monster.nickname}{' '}
+            <Text
+              style={{
+                color: monster.gender === 'male' ? theme.colors.male : theme.colors.female,
+              }}
+            >
+              {GENDER_SYMBOLS[monster.gender]}
+            </Text>{' '}
+            ✎
           </Text>
         )}
         <View style={[styles.elementBadge, { backgroundColor: species.color + '33' }]}>

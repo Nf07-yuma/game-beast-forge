@@ -15,10 +15,11 @@ function StarterPicker() {
     const species = SPECIES[id];
     Alert.alert(
       `${species.name}に決定しますか?`,
-      'はじめての相棒は後から変更できません。',
+      '性別を選んでください。はじめての相棒は後から変更できません。',
       [
         { text: 'キャンセル', style: 'cancel' },
-        { text: '決定', onPress: () => chooseStarter(id) },
+        { text: '♂ オス', onPress: () => chooseStarter(id, 'male') },
+        { text: '♀ メス', onPress: () => chooseStarter(id, 'female') },
       ]
     );
   }
