@@ -41,7 +41,12 @@ export function MonsterCard({ monster, onPress, selected, disabled, disabledReas
         </View>
         <View style={styles.affectionRow}>
           <Text style={styles.heart}>♥</Text>
-          <ProgressBar ratio={monster.affection / 100} color={theme.colors.heart} height={6} />
+          <ProgressBar
+            ratio={monster.affection / 100}
+            color={theme.colors.heart}
+            height={6}
+            style={styles.affectionBar}
+          />
         </View>
         {disabled && disabledReason ? (
           <Text style={styles.disabledReason}>{disabledReason}</Text>
@@ -103,6 +108,9 @@ const styles = StyleSheet.create({
     color: theme.colors.heart,
     fontSize: 12,
     marginRight: 6,
+  },
+  affectionBar: {
+    flex: 1,
   },
   disabledReason: {
     color: theme.colors.danger,
