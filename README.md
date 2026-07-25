@@ -18,6 +18,15 @@ npm start
 
 Expo Go アプリ（iOS/Android）でQRコードを読み取るか、`npm run ios` / `npm run android` でシミュレータ・エミュレータ上で起動できます。
 
+## テスト
+
+```bash
+npm run typecheck   # 型チェック
+npm test             # ユニットテスト（Jest）
+```
+
+`src/game/logic.ts`（育成・交配のロジック）、`src/data/species.ts`（種族データ）、`src/store/gameStore.ts`（ゲーム状態のストア）に対するユニットテストが `src/**/*.test.ts` にあります。プッシュ・プルリクエスト時には `.github/workflows/ci.yml` により型チェック・テスト・Androidバンドルのビルド確認が自動実行されます。
+
 ## 技術構成
 
 - **Expo (SDK 57) + React Native + TypeScript**
