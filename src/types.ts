@@ -1,0 +1,45 @@
+export type ElementType = 'fire' | 'water' | 'grass' | 'electric' | 'rock' | 'mystic';
+
+export interface Stats {
+  hp: number;
+  atk: number;
+  def: number;
+  spd: number;
+}
+
+export interface Species {
+  id: string;
+  name: string;
+  element: ElementType;
+  emoji: string;
+  color: string;
+  baseStats: Stats;
+  growth: Stats;
+  description: string;
+}
+
+export interface Monster {
+  id: string;
+  speciesId: string;
+  nickname: string;
+  level: number;
+  exp: number;
+  ivs: Stats;
+  affection: number;
+  generation: number;
+  parentIds?: [string, string];
+  createdAt: number;
+  lastFedAt: number | null;
+  lastTrainedAt: number | null;
+  breedingCooldownUntil: number | null;
+}
+
+export interface Egg {
+  id: string;
+  parentIds: [string, string];
+  speciesId: string;
+  ivs: Stats;
+  generation: number;
+  createdAt: number;
+  hatchAt: number;
+}
