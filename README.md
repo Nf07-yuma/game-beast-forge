@@ -25,11 +25,13 @@ npm run typecheck   # 型チェック
 npm test             # ユニットテスト（Jest）
 ```
 
-`src/game/logic.ts`（育成・交配のロジック）、`src/data/species.ts`（種族データ）、`src/store/gameStore.ts`（ゲーム状態のストア）に対するユニットテストが `src/**/*.test.ts` にあります。プッシュ・プルリクエスト時には `.github/workflows/ci.yml` により型チェック・テスト・Androidバンドルのビルド確認が自動実行されます。
+`src/game/logic.ts`（育成・交配のロジック）、`src/data/species.ts`（種族データ）、`src/store/gameStore.ts`（ゲーム状態のストア）に対するユニットテストが `src/**/*.test.ts` にあります。プッシュ・プルリクエスト時には `.github/workflows/ci.yml` により型チェック・テスト・Androidバンドルのビルド確認・デバッグAPKのビルドが自動実行されます。
+
+CIの `build-apk` ジョブは `expo prebuild` でネイティブAndroidプロジェクトを生成し、`./gradlew assembleDebug` で実際に `.apk` をビルドします。成功すると `beast-forge-debug-apk` という名前でワークフロー実行のArtifactsからデバッグ用APKをダウンロードできます（GitHubの Actions タブ → 該当のワークフロー実行 → Artifacts）。署名は開発用の自動生成キーのため、そのままではPlayストアに提出できません（配布用のリリースビルドは下記の方法をお使いください）。
 
 ## APKファイルを作る（Android実機/エミュレータへの配布）
 
-このプロジェクトではAndroidの実行ファイル（`.apk`）はリポジトリにコミットせず、必要になったタイミングでビルドします。方法は2通りあります。
+このプロジェクトではAndroidの実行ファイル（`.apk`）はリポジトリにコミットせず、必要になったタイミングでビルドします。動作確認用のデバッグAPKはCIが自動生成しますが（上記）、配布用のリリースビルドを作る場合は以下の方法を使ってください。
 
 ### 方法A: EAS Build（推奨・クラウドビルド）
 
