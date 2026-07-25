@@ -25,7 +25,40 @@ npm run typecheck   # 型チェック
 npm test             # ユニットテスト（Jest）
 ```
 
-`src/game/logic.ts`（育成・交配のロジック）、`src/data/species.ts`（種族データ）、`src/store/gameStore.ts`（ゲーム状態のストア）に対するユニットテストが `src/**/*.test.ts` にあります。プッシュ・プルリクエスト時には `.github/workflows/ci.yml` により型チェック・テスト・Androidバンドルのビルド確認が自動実行されます。
+`src/game/logic.ts`（育成・交配のロジック）、`src/data/species.ts`（種族データ）、`src/store/gameStore.ts`（ゲーム状態のストア）に対するユニットテストが `src/**/*.test.ts` にあります。プッシュ・プルリクエスト時には `.github/workflows/ci.yml` により型チェック・テスト・Androidバンドルのビルド確認・デバッグAPKのビルドが自動実行されます。
+
+CIの `build-apk` ジョブは `expo prebuild` でネイティブAndroidプロジェクトを生成し、`./gradlew assembleDebug` で実際に `.apk` をビルドします。成功すると `beast-forge-debug-apk` という名前でワークフロー実行のArtifactsからデバッグ用APKをダウンロードできます（GitHubの Actions タブ → 該当のワークフロー実行 → Artifacts）。署名は開発用の自動生成キーのため、そのままではPlayストアに提出できません（配布用のリリースビルドは下記の方法をお使いください）。
+
+## APKファイルを作る（Android実機/エミュレータへの配布）
+
+このプロジェクトではAndroidの実行ファイル（`.apk`）はリポジトリにコミットせず、必要になったタイミングでビルドします。動作確認用のデバッグAPKはCIが自動生成しますが（上記）、配布用のリリースビルドを作る場合は以下の方法を使ってください。
+
+### 方法A: EAS Build（推奨・クラウドビルド）
+
+Android SDKやGradleをローカルに用意しなくても、Expoのクラウド上でビルドできます。Expoアカウント（無料）が必要です。
+
+```bash
+npm install -g eas-cli   # 初回のみ
+eas login                 # Expoアカウントでログイン
+eas build:configure       # 初回のみ。app.json に eas.projectId が追記されます
+eas build --platform android --profile preview
+```
+
+ビルドが終わるとダウンロードリンクが表示されるので、そこから `.apk` を取得できます（`preview` プロファイルは `eas.json` で `buildType: "apk"` を指定済みなので、Playストア提出用の `.aab` ではなく直接インストール可能な `.apk` が出力されます）。
+
+### 方法B: ローカルビルド（Android SDK/JDKが必要）
+
+自分のPCにAndroid Studio（Android SDK）とJDKがセットアップ済みなら、ローカルだけで完結できます。
+
+```bash
+npx expo prebuild -p android   # android/ ディレクトリをネイティブプロジェクトとして生成
+cd android
+./gradlew assembleRelease       # または assembleDebug（署名なしですぐ試したい場合）
+```
+
+成功すると `android/app/build/outputs/apk/release/app-release.apk` が生成されます。
+
+> 現状 `android/` はリポジトリに含めていません（`.gitignore` で除外）。`expo prebuild` はいつでも再生成できるので、通常はコミットしないままで問題ありません。
 
 ## 技術構成
 
