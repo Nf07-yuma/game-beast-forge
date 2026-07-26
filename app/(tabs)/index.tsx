@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useGameStore } from '@/store/gameStore';
 import { SPECIES, STARTER_SPECIES_IDS } from '@/data/species';
@@ -10,6 +10,20 @@ import { theme } from '@/theme';
 
 function StarterPicker() {
   const chooseStarter = useGameStore((s) => s.chooseStarter);
+
+  function handleSelect(id: string) {
+    const species = SPECIES[id];
+    Alert.alert(
+      `${species.name}に決定しますか?`,
+      '性別を選んでください。はじめての相棒は後から変更できません。',
+      [
+        { text: 'キャンセル', style: 'cancel' },
+        { text: '♂ オス', onPress: () => chooseStarter(id, 'male') },
+        { text: '♀ メス', onPress: () => chooseStarter(id, 'female') },
+      ]
+    );
+  }
+
   return (
     <View style={styles.starterWrap}>
       <Text style={styles.starterTitle}>はじめての相棒を選ぼう</Text>
@@ -17,7 +31,7 @@ function StarterPicker() {
       {STARTER_SPECIES_IDS.map((id) => {
         const species = SPECIES[id];
         return (
-          <Pressable key={id} style={styles.starterCard} onPress={() => chooseStarter(id)}>
+          <Pressable key={id} style={styles.starterCard} onPress={() => handleSelect(id)}>
             <MonsterAvatar species={species} size={64} />
             <View style={styles.starterInfo}>
               <Text style={styles.starterName}>{species.name}</Text>

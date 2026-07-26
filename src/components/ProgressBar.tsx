@@ -1,17 +1,18 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import { theme } from '@/theme';
 
 interface Props {
   ratio: number;
   color?: string;
   height?: number;
+  style?: ViewStyle;
 }
 
-export function ProgressBar({ ratio, color = theme.colors.accent, height = 8 }: Props) {
+export function ProgressBar({ ratio, color = theme.colors.accent, height = 8, style }: Props) {
   const clamped = Math.min(1, Math.max(0, ratio));
   return (
-    <View style={[styles.track, { height, borderRadius: height / 2 }]}>
+    <View style={[styles.track, { height, borderRadius: height / 2 }, style]}>
       <View
         style={[
           styles.fill,

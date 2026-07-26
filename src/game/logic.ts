@@ -1,4 +1,4 @@
-import { Species, Stats, Monster } from '@/types';
+import { Species, Stats, Monster, Gender } from '@/types';
 import { getSpecies, HYBRID_TABLE } from '@/data/species';
 
 export const COOLDOWNS = {
@@ -15,6 +15,10 @@ export const TRAIN_EXP = 40;
 export const TRAIN_AFFECTION = 3;
 
 const IV_MAX = 31;
+
+export function randomGender(): Gender {
+  return Math.random() < 0.5 ? 'male' : 'female';
+}
 
 export function randomIVs(): Stats {
   return {
@@ -96,6 +100,28 @@ export function canBreed(monster: Monster, now: number): { ok: boolean; reason?:
   }
   if (monster.breedingCooldownUntil && monster.breedingCooldownUntil > now) {
     return { ok: false, reason: '交配クールダウン中です' };
+  }
+  return { ok: true };
+}
+
+export function canBreedPair(
+  a: Monster,
+  b: Monster,
+  now: number
+): { ok: boolean; reason?: string } {
+  if (a.id === b.id) {
+    return { ok: false, reason: '同じモンスター同士は交配できません' };
+  }
+  const checkA = canBreed(a, now);
+  if (!checkA.ok) {
+    return { ok: false, reason: `${a.nickname}: ${checkA.reason}` };
+  }
+  const checkB = canBreed(b, now);
+  if (!checkB.ok) {
+    return { ok: false, reason: `${b.nickname}: ${checkB.reason}` };
+  }
+  if (a.gender === b.gender) {
+    return { ok: false, reason: 'オスとメスの組み合わせでのみ交配できます' };
   }
   return { ok: true };
 }

@@ -2,12 +2,12 @@ import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useGameStore } from '@/store/gameStore';
 import { getSpecies, HYBRID_TABLE } from '@/data/species';
-import { canBreed } from '@/game/logic';
+import { canBreed, canBreedPair } from '@/game/logic';
 import { useNow } from '@/hooks/useNow';
 import { MonsterCard } from '@/components/MonsterCard';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { MonsterAvatar } from '@/components/MonsterAvatar';
-import { theme, ELEMENT_LABELS } from '@/theme';
+import { theme, GENDER_SYMBOLS } from '@/theme';
 
 export default function BreedingScreen() {
   const monsters = useGameStore((s) => s.monsters);
@@ -37,18 +37,23 @@ export default function BreedingScreen() {
 
   const parentA = selected[0] ? monsters[selected[0]] : null;
   const parentB = selected[1] ? monsters[selected[1]] : null;
+  const pairCheck = parentA && parentB ? canBreedPair(parentA, parentB, now) : null;
 
   let hint: string | null = null;
   if (parentA && parentB) {
-    const elA = getSpecies(parentA.speciesId).element;
-    const elB = getSpecies(parentB.speciesId).element;
-    if (parentA.speciesId === parentB.speciesId) {
-      hint = `${getSpecies(parentA.speciesId).name}が生まれるはず`;
+    if (pairCheck && !pairCheck.ok) {
+      hint = pairCheck.reason ?? null;
     } else {
-      const hybridId = HYBRID_TABLE[`${elA}+${elB}`] ?? HYBRID_TABLE[`${elB}+${elA}`];
-      hint = hybridId
-        ? `もしかしたら希少種「${getSpecies(hybridId).name}」が生まれるかも…！`
-        : 'どちらかの親の種族が生まれます';
+      const elA = getSpecies(parentA.speciesId).element;
+      const elB = getSpecies(parentB.speciesId).element;
+      if (parentA.speciesId === parentB.speciesId) {
+        hint = `${getSpecies(parentA.speciesId).name}が生まれるはず`;
+      } else {
+        const hybridId = HYBRID_TABLE[`${elA}+${elB}`] ?? HYBRID_TABLE[`${elB}+${elA}`];
+        hint = hybridId
+          ? `もしかしたら希少種「${getSpecies(hybridId).name}」が生まれるかも…！`
+          : 'どちらかの親の種族が生まれます';
+      }
     }
   }
 
@@ -57,7 +62,7 @@ export default function BreedingScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>2匹選んで交配しよう</Text>
         <Text style={styles.subtitle}>
-          Lv.5以上、クールダウン中でないモンスター同士を選択できます
+          Lv.5以上、クールダウン中でないオスとメスのペアを選択できます
         </Text>
 
         {(parentA || parentB) && (
@@ -65,7 +70,20 @@ export default function BreedingScreen() {
             <View style={styles.previewRow}>
               <View style={styles.previewSlot}>
                 {parentA ? (
-                  <MonsterAvatar species={getSpecies(parentA.speciesId)} size={56} />
+                  <>
+                    <MonsterAvatar species={getSpecies(parentA.speciesId)} size={56} />
+                    <Text
+                      style={[
+                        styles.previewGender,
+                        {
+                          color:
+                            parentA.gender === 'male' ? theme.colors.male : theme.colors.female,
+                        },
+                      ]}
+                    >
+                      {GENDER_SYMBOLS[parentA.gender]}
+                    </Text>
+                  </>
                 ) : (
                   <View style={styles.emptySlot}>
                     <Text style={styles.emptySlotText}>?</Text>
@@ -75,7 +93,20 @@ export default function BreedingScreen() {
               <Text style={styles.plus}>×</Text>
               <View style={styles.previewSlot}>
                 {parentB ? (
-                  <MonsterAvatar species={getSpecies(parentB.speciesId)} size={56} />
+                  <>
+                    <MonsterAvatar species={getSpecies(parentB.speciesId)} size={56} />
+                    <Text
+                      style={[
+                        styles.previewGender,
+                        {
+                          color:
+                            parentB.gender === 'male' ? theme.colors.male : theme.colors.female,
+                        },
+                      ]}
+                    >
+                      {GENDER_SYMBOLS[parentB.gender]}
+                    </Text>
+                  </>
                 ) : (
                   <View style={styles.emptySlot}>
                     <Text style={styles.emptySlotText}>?</Text>
@@ -83,11 +114,15 @@ export default function BreedingScreen() {
                 )}
               </View>
             </View>
-            {hint ? <Text style={styles.hint}>{hint}</Text> : null}
+            {hint ? (
+              <Text style={[styles.hint, pairCheck && !pairCheck.ok && styles.hintWarning]}>
+                {hint}
+              </Text>
+            ) : null}
             <PrimaryButton
               label="交配する"
               onPress={handleBreed}
-              disabled={!(parentA && parentB)}
+              disabled={!(parentA && parentB) || !pairCheck?.ok}
               style={styles.breedButton}
             />
           </View>
@@ -98,8 +133,11 @@ export default function BreedingScreen() {
           <Text style={styles.empty}>モンスターがいません</Text>
         ) : (
           monsterList.map((monster) => {
-            const check = canBreed(monster, now);
             const isSelected = selected.includes(monster.id);
+            const otherParent = !isSelected && selected.length === 1 ? parentA : null;
+            const check = otherParent
+              ? canBreedPair(otherParent, monster, now)
+              : canBreed(monster, now);
             return (
               <MonsterCard
                 key={monster.id}
@@ -163,7 +201,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   previewSlot: {
+    alignItems: 'center',
     marginHorizontal: 12,
+  },
+  previewGender: {
+    fontSize: 16,
+    fontWeight: '800',
+    marginTop: 4,
   },
   emptySlot: {
     width: 56,
@@ -189,6 +233,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'center',
     marginTop: 12,
+  },
+  hintWarning: {
+    color: theme.colors.danger,
   },
   breedButton: {
     marginTop: 14,

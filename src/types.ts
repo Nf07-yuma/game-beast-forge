@@ -1,5 +1,7 @@
 export type ElementType = 'fire' | 'water' | 'grass' | 'electric' | 'rock' | 'mystic';
 
+export type Gender = 'male' | 'female';
+
 export interface Stats {
   hp: number;
   atk: number;
@@ -22,6 +24,7 @@ export interface Monster {
   id: string;
   speciesId: string;
   nickname: string;
+  gender: Gender;
   level: number;
   exp: number;
   ivs: Stats;
@@ -38,6 +41,7 @@ export interface Egg {
   id: string;
   parentIds: [string, string];
   speciesId: string;
+  gender: Gender;
   ivs: Stats;
   generation: number;
   createdAt: number;

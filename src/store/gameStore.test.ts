@@ -7,6 +7,7 @@ function makeMonster(overrides: Partial<Monster> = {}): Monster {
     id: 'm1',
     speciesId: 'emberpup',
     nickname: 'テスト',
+    gender: 'male',
     level: MIN_BREED_LEVEL,
     exp: 0,
     ivs: { hp: 20, atk: 20, def: 20, spd: 20 },
@@ -31,16 +32,18 @@ afterEach(() => {
 });
 
 describe('chooseStarter', () => {
-  it('adds exactly one monster and flips hasStarter', () => {
-    useGameStore.getState().chooseStarter('emberpup');
+  it('adds exactly one monster with the chosen gender and flips hasStarter', () => {
+    useGameStore.getState().chooseStarter('emberpup', 'female');
     const state = useGameStore.getState();
     expect(state.hasStarter).toBe(true);
-    expect(Object.keys(state.monsters)).toHaveLength(1);
+    const monsters = Object.values(state.monsters);
+    expect(monsters).toHaveLength(1);
+    expect(monsters[0].gender).toBe('female');
   });
 
   it('is a no-op once a starter has already been chosen', () => {
-    useGameStore.getState().chooseStarter('emberpup');
-    useGameStore.getState().chooseStarter('aquafin');
+    useGameStore.getState().chooseStarter('emberpup', 'male');
+    useGameStore.getState().chooseStarter('aquafin', 'female');
     expect(Object.keys(useGameStore.getState().monsters)).toHaveLength(1);
   });
 });
@@ -114,19 +117,31 @@ describe('breedMonsters', () => {
   it('rejects monsters below the minimum breeding level', () => {
     useGameStore.setState({
       monsters: {
-        m1: makeMonster({ id: 'm1', level: MIN_BREED_LEVEL - 1 }),
-        m2: makeMonster({ id: 'm2', speciesId: 'aquafin' }),
+        m1: makeMonster({ id: 'm1', gender: 'male', level: MIN_BREED_LEVEL - 1 }),
+        m2: makeMonster({ id: 'm2', speciesId: 'aquafin', gender: 'female' }),
       },
     });
     const result = useGameStore.getState().breedMonsters('m1', 'm2');
     expect(result.ok).toBe(false);
   });
 
+  it('rejects two monsters of the same gender', () => {
+    useGameStore.setState({
+      monsters: {
+        m1: makeMonster({ id: 'm1', speciesId: 'emberpup', gender: 'male' }),
+        m2: makeMonster({ id: 'm2', speciesId: 'aquafin', gender: 'male' }),
+      },
+    });
+    const result = useGameStore.getState().breedMonsters('m1', 'm2');
+    expect(result.ok).toBe(false);
+    expect(Object.keys(useGameStore.getState().eggs)).toHaveLength(0);
+  });
+
   it('creates an egg and puts both parents on cooldown', () => {
     useGameStore.setState({
       monsters: {
-        m1: makeMonster({ id: 'm1', speciesId: 'emberpup' }),
-        m2: makeMonster({ id: 'm2', speciesId: 'aquafin' }),
+        m1: makeMonster({ id: 'm1', speciesId: 'emberpup', gender: 'male' }),
+        m2: makeMonster({ id: 'm2', speciesId: 'aquafin', gender: 'female' }),
       },
     });
     const result = useGameStore.getState().breedMonsters('m1', 'm2');
@@ -137,6 +152,7 @@ describe('breedMonsters', () => {
     const egg = Object.values(state.eggs)[0];
     expect(egg.speciesId).toBe('steamkit');
     expect(egg.parentIds).toEqual(['m1', 'm2']);
+    expect(['male', 'female']).toContain(egg.gender);
     expect(state.monsters.m1.breedingCooldownUntil).not.toBeNull();
     expect(state.monsters.m2.breedingCooldownUntil).not.toBeNull();
 
@@ -149,8 +165,8 @@ describe('hatchEgg', () => {
   it('refuses to hatch before the egg is ready', () => {
     useGameStore.setState({
       monsters: {
-        m1: makeMonster({ id: 'm1', speciesId: 'emberpup' }),
-        m2: makeMonster({ id: 'm2', speciesId: 'aquafin' }),
+        m1: makeMonster({ id: 'm1', speciesId: 'emberpup', gender: 'male' }),
+        m2: makeMonster({ id: 'm2', speciesId: 'aquafin', gender: 'female' }),
       },
     });
     useGameStore.getState().breedMonsters('m1', 'm2');
@@ -162,8 +178,8 @@ describe('hatchEgg', () => {
   it('hatches into a new monster and removes the egg once ready', () => {
     useGameStore.setState({
       monsters: {
-        m1: makeMonster({ id: 'm1', speciesId: 'emberpup' }),
-        m2: makeMonster({ id: 'm2', speciesId: 'aquafin' }),
+        m1: makeMonster({ id: 'm1', speciesId: 'emberpup', gender: 'male' }),
+        m2: makeMonster({ id: 'm2', speciesId: 'aquafin', gender: 'female' }),
       },
     });
     useGameStore.getState().breedMonsters('m1', 'm2');
@@ -180,6 +196,7 @@ describe('hatchEgg', () => {
     expect(hatched.speciesId).toBe('steamkit');
     expect(hatched.parentIds).toEqual(['m1', 'm2']);
     expect(hatched.generation).toBe(2);
+    expect(['male', 'female']).toContain(hatched.gender);
   });
 
   it('fails for an unknown egg id', () => {

@@ -3,11 +3,13 @@ import {
   MIN_BREED_LEVEL,
   addExp,
   canBreed,
+  canBreedPair,
   clampAffection,
   computeStats,
   determineChildSpeciesId,
   expForLevel,
   inheritIVs,
+  randomGender,
   randomIVs,
 } from './logic';
 import { getSpecies } from '@/data/species';
@@ -18,6 +20,7 @@ function makeMonster(overrides: Partial<Monster> = {}): Monster {
     id: 'm1',
     speciesId: 'emberpup',
     nickname: 'テスト',
+    gender: 'male',
     level: 5,
     exp: 0,
     ivs: { hp: 20, atk: 20, def: 20, spd: 20 },
@@ -80,6 +83,14 @@ describe('addExp', () => {
     expect(result.levelsGained).toBeGreaterThan(1);
     expect(result.exp).toBeGreaterThanOrEqual(0);
     expect(result.exp).toBeLessThan(expForLevel(result.level));
+  });
+});
+
+describe('randomGender', () => {
+  it('only ever returns male or female', () => {
+    for (let i = 0; i < 50; i++) {
+      expect(['male', 'female']).toContain(randomGender());
+    }
   });
 });
 
@@ -156,6 +167,36 @@ describe('canBreed', () => {
       breedingCooldownUntil: now - 1,
     });
     expect(canBreed(pastCooldown, now).ok).toBe(true);
+  });
+});
+
+describe('canBreedPair', () => {
+  const now = Date.now();
+
+  it('rejects a monster paired with itself', () => {
+    const monster = makeMonster({ id: 'same', gender: 'male' });
+    expect(canBreedPair(monster, monster, now).ok).toBe(false);
+  });
+
+  it('rejects two monsters of the same gender', () => {
+    const a = makeMonster({ id: 'a', gender: 'male' });
+    const b = makeMonster({ id: 'b', gender: 'male' });
+    const result = canBreedPair(a, b, now);
+    expect(result.ok).toBe(false);
+    expect(result.reason).toBeTruthy();
+  });
+
+  it('rejects the pair if either monster individually fails eligibility', () => {
+    const a = makeMonster({ id: 'a', gender: 'male', level: MIN_BREED_LEVEL - 1 });
+    const b = makeMonster({ id: 'b', gender: 'female' });
+    expect(canBreedPair(a, b, now).ok).toBe(false);
+  });
+
+  it('allows an eligible male/female pair', () => {
+    const a = makeMonster({ id: 'a', gender: 'male' });
+    const b = makeMonster({ id: 'b', gender: 'female' });
+    expect(canBreedPair(a, b, now).ok).toBe(true);
+    expect(canBreedPair(b, a, now).ok).toBe(true);
   });
 });
 

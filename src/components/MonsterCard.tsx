@@ -4,7 +4,7 @@ import { Monster } from '@/types';
 import { getSpecies } from '@/data/species';
 import { MonsterAvatar } from './MonsterAvatar';
 import { ProgressBar } from './ProgressBar';
-import { theme, ELEMENT_LABELS } from '@/theme';
+import { theme, ELEMENT_LABELS, GENDER_SYMBOLS } from '@/theme';
 
 interface Props {
   monster: Monster;
@@ -38,10 +38,23 @@ export function MonsterCard({ monster, onPress, selected, disabled, disabledReas
             </Text>
           </View>
           <Text style={styles.level}>Lv.{monster.level}</Text>
+          <Text
+            style={[
+              styles.gender,
+              { color: monster.gender === 'male' ? theme.colors.male : theme.colors.female },
+            ]}
+          >
+            {GENDER_SYMBOLS[monster.gender]}
+          </Text>
         </View>
         <View style={styles.affectionRow}>
           <Text style={styles.heart}>♥</Text>
-          <ProgressBar ratio={monster.affection / 100} color={theme.colors.heart} height={6} />
+          <ProgressBar
+            ratio={monster.affection / 100}
+            color={theme.colors.heart}
+            height={6}
+            style={styles.affectionBar}
+          />
         </View>
         {disabled && disabledReason ? (
           <Text style={styles.disabledReason}>{disabledReason}</Text>
@@ -94,6 +107,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
+  gender: {
+    fontSize: 13,
+    fontWeight: '800',
+    marginLeft: 8,
+  },
   affectionRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -103,6 +121,9 @@ const styles = StyleSheet.create({
     color: theme.colors.heart,
     fontSize: 12,
     marginRight: 6,
+  },
+  affectionBar: {
+    flex: 1,
   },
   disabledReason: {
     color: theme.colors.danger,
