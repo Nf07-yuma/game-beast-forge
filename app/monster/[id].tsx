@@ -9,7 +9,7 @@ import { MonsterAvatar } from '@/components/MonsterAvatar';
 import { ProgressBar } from '@/components/ProgressBar';
 import { StatBar } from '@/components/StatBar';
 import { PrimaryButton } from '@/components/PrimaryButton';
-import { theme, ELEMENT_LABELS, GENDER_SYMBOLS } from '@/theme';
+import { theme, ELEMENT_LABELS, GENDER_LABELS, GENDER_SYMBOLS } from '@/theme';
 
 const STAT_DISPLAY_MAX = 60;
 
@@ -80,21 +80,33 @@ export default function MonsterDetailScreen() {
           />
         ) : (
           <Text style={styles.name} onPress={() => setEditingName(true)}>
-            {monster.nickname}{' '}
-            <Text
-              style={{
-                color: monster.gender === 'male' ? theme.colors.male : theme.colors.female,
-              }}
-            >
-              {GENDER_SYMBOLS[monster.gender]}
-            </Text>{' '}
-            ✎
+            {monster.nickname} ✎
           </Text>
         )}
-        <View style={[styles.elementBadge, { backgroundColor: species.color + '33' }]}>
-          <Text style={[styles.elementText, { color: species.color }]}>
-            {species.name} ・ {ELEMENT_LABELS[species.element]}属性
-          </Text>
+        <View style={styles.badgeRow}>
+          <View style={[styles.elementBadge, { backgroundColor: species.color + '33' }]}>
+            <Text style={[styles.elementText, { color: species.color }]}>
+              {species.name} ・ {ELEMENT_LABELS[species.element]}属性
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.genderBadge,
+              {
+                backgroundColor:
+                  (monster.gender === 'male' ? theme.colors.male : theme.colors.female) + '33',
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.genderText,
+                { color: monster.gender === 'male' ? theme.colors.male : theme.colors.female },
+              ]}
+            >
+              {GENDER_SYMBOLS[monster.gender]} {GENDER_LABELS[monster.gender]}
+            </Text>
+          </View>
         </View>
         {monster.generation > 1 ? (
           <Text style={styles.generation}>第{monster.generation}世代</Text>
@@ -185,13 +197,27 @@ const styles = StyleSheet.create({
     minWidth: 160,
     textAlign: 'center',
   },
-  elementBadge: {
+  badgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 10,
+    gap: 8,
+  },
+  elementBadge: {
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
   },
   elementText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  genderBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  genderText: {
     fontSize: 12,
     fontWeight: '700',
   },
