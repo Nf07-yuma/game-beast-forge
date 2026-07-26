@@ -132,12 +132,22 @@ describe('determineChildSpeciesId', () => {
     expect(determineChildSpeciesId('boulderam', 'emberpup')).toBe('magmite');
   });
 
-  it('falls back to one of the two parents for a non-hybrid combo', () => {
+  it('covers every pair of the five base species with a dedicated hybrid', () => {
+    expect(determineChildSpeciesId('emberpup', 'leafling')).toBe('ashfern');
+    expect(determineChildSpeciesId('emberpup', 'sparkit')).toBe('flamespark');
+    expect(determineChildSpeciesId('aquafin', 'leafling')).toBe('suirenturtle');
+    expect(determineChildSpeciesId('aquafin', 'sparkit')).toBe('voltserpent');
+    expect(determineChildSpeciesId('aquafin', 'boulderam')).toBe('tidecrab');
+    expect(determineChildSpeciesId('leafling', 'boulderam')).toBe('mossshell');
+    expect(determineChildSpeciesId('sparkit', 'boulderam')).toBe('thunderram');
+  });
+
+  it('falls back to one of the two parents for a non-hybrid combo (e.g. two mystic hybrids)', () => {
     const randomSpy = jest.spyOn(Math, 'random');
     randomSpy.mockReturnValue(0.1);
-    expect(determineChildSpeciesId('emberpup', 'sparkit')).toBe('emberpup');
+    expect(determineChildSpeciesId('steamkit', 'bloomvolt')).toBe('steamkit');
     randomSpy.mockReturnValue(0.9);
-    expect(determineChildSpeciesId('emberpup', 'sparkit')).toBe('sparkit');
+    expect(determineChildSpeciesId('steamkit', 'bloomvolt')).toBe('bloomvolt');
     randomSpy.mockRestore();
   });
 });

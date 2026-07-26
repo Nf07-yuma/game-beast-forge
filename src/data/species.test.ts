@@ -26,6 +26,24 @@ describe('SPECIES table', () => {
       expect(SPECIES[hybridId]).toBeDefined();
     }
   });
+
+  it('has a hybrid mapped for every pair of non-mystic elements', () => {
+    const baseElements = Array.from(
+      new Set(
+        Object.values(SPECIES)
+          .filter((s) => s.element !== 'mystic')
+          .map((s) => s.element)
+      )
+    );
+    for (let i = 0; i < baseElements.length; i++) {
+      for (let j = i + 1; j < baseElements.length; j++) {
+        const a = baseElements[i];
+        const b = baseElements[j];
+        const hasCombo = `${a}+${b}` in HYBRID_TABLE || `${b}+${a}` in HYBRID_TABLE;
+        expect(hasCombo).toBe(true);
+      }
+    }
+  });
 });
 
 describe('getSpecies', () => {
