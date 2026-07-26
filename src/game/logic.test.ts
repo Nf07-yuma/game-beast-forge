@@ -29,6 +29,7 @@ function makeMonster(overrides: Partial<Monster> = {}): Monster {
     createdAt: Date.now(),
     lastFedAt: null,
     lastTrainedAt: null,
+    lastBattledAt: null,
     breedingCooldownUntil: null,
     ...overrides,
   };

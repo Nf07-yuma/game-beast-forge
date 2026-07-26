@@ -34,6 +34,7 @@ export interface Monster {
   createdAt: number;
   lastFedAt: number | null;
   lastTrainedAt: number | null;
+  lastBattledAt: number | null;
   breedingCooldownUntil: number | null;
 }
 

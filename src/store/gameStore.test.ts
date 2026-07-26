@@ -1,5 +1,6 @@
 import { useGameStore } from './gameStore';
 import { COOLDOWNS, MIN_BREED_LEVEL } from '@/game/logic';
+import { BATTLE_COOLDOWN_MS } from '@/game/battle';
 import { Monster } from '@/types';
 
 function makeMonster(overrides: Partial<Monster> = {}): Monster {
@@ -16,13 +17,14 @@ function makeMonster(overrides: Partial<Monster> = {}): Monster {
     createdAt: Date.now(),
     lastFedAt: null,
     lastTrainedAt: null,
+    lastBattledAt: null,
     breedingCooldownUntil: null,
     ...overrides,
   };
 }
 
 beforeEach(() => {
-  useGameStore.setState({ monsters: {}, eggs: {}, hasStarter: false });
+  useGameStore.setState({ monsters: {}, eggs: {}, hasStarter: false, lastBattle: null });
   jest.useFakeTimers({ advanceTimers: false });
   jest.setSystemTime(new Date('2026-01-01T00:00:00Z'));
 });
@@ -201,5 +203,56 @@ describe('hatchEgg', () => {
 
   it('fails for an unknown egg id', () => {
     expect(useGameStore.getState().hatchEgg('does-not-exist').ok).toBe(false);
+  });
+});
+
+describe('battleMonsters', () => {
+  it('rejects battling a monster with itself', () => {
+    useGameStore.setState({ monsters: { m1: makeMonster() } });
+    expect(useGameStore.getState().battleMonsters('m1', 'm1').ok).toBe(false);
+  });
+
+  it('fails for unknown monster ids', () => {
+    useGameStore.setState({ monsters: { m1: makeMonster() } });
+    expect(useGameStore.getState().battleMonsters('m1', 'does-not-exist').ok).toBe(false);
+  });
+
+  it('declares a winner, grants EXP/affection to both, and puts both on cooldown', () => {
+    useGameStore.setState({
+      monsters: {
+        m1: makeMonster({ id: 'm1', level: 20, exp: 0, affection: 50 }),
+        m2: makeMonster({ id: 'm2', level: 1, exp: 0, affection: 50 }),
+      },
+    });
+    const result = useGameStore.getState().battleMonsters('m1', 'm2');
+    expect(result.ok).toBe(true);
+    expect(result.monsterId).toBeTruthy();
+
+    const state = useGameStore.getState();
+    expect(state.lastBattle).not.toBeNull();
+    expect(state.lastBattle!.winnerId).toBe(result.monsterId);
+    expect([state.lastBattle!.winnerId, state.lastBattle!.loserId].sort()).toEqual(['m1', 'm2']);
+    expect(state.lastBattle!.turns.length).toBeGreaterThan(0);
+
+    expect(state.monsters.m1.lastBattledAt).not.toBeNull();
+    expect(state.monsters.m2.lastBattledAt).not.toBeNull();
+    // Everyone gets some reward: total EXP granted across both should exceed zero.
+    expect(state.monsters.m1.exp + state.monsters.m1.level).toBeGreaterThan(0);
+    expect(state.monsters.m2.exp + state.monsters.m2.level).toBeGreaterThan(0);
+
+    // Battling again immediately should fail: both are now on cooldown.
+    expect(useGameStore.getState().battleMonsters('m1', 'm2').ok).toBe(false);
+  });
+
+  it('allows battling again once the cooldown has elapsed', () => {
+    useGameStore.setState({
+      monsters: {
+        m1: makeMonster({ id: 'm1' }),
+        m2: makeMonster({ id: 'm2' }),
+      },
+    });
+    useGameStore.getState().battleMonsters('m1', 'm2');
+    jest.setSystemTime(new Date(Date.now() + BATTLE_COOLDOWN_MS + 1));
+    expect(useGameStore.getState().battleMonsters('m1', 'm2').ok).toBe(true);
   });
 });
