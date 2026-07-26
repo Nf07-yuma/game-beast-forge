@@ -17,6 +17,15 @@ import {
   randomGender,
   randomIVs,
 } from '@/game/logic';
+import {
+  BATTLE_LOSE_AFFECTION,
+  BATTLE_LOSE_EXP,
+  BATTLE_WIN_AFFECTION,
+  BATTLE_WIN_EXP,
+  BattleResult,
+  canBattle,
+  simulateBattle,
+} from '@/game/battle';
 
 function genId(prefix: string): string {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -44,6 +53,7 @@ function createMonster(params: {
     createdAt: Date.now(),
     lastFedAt: null,
     lastTrainedAt: null,
+    lastBattledAt: null,
     breedingCooldownUntil: null,
   };
 }
@@ -58,12 +68,14 @@ interface GameState {
   monsters: Record<string, Monster>;
   eggs: Record<string, Egg>;
   hasStarter: boolean;
+  lastBattle: BattleResult | null;
   chooseStarter: (speciesId: string, gender: Gender) => void;
   renameMonster: (id: string, nickname: string) => void;
   feedMonster: (id: string) => ActionResult;
   trainMonster: (id: string) => ActionResult;
   breedMonsters: (idA: string, idB: string) => ActionResult;
   hatchEgg: (id: string) => ActionResult;
+  battleMonsters: (idA: string, idB: string) => ActionResult;
 }
 
 export const useGameStore = create<GameState>()(
@@ -72,6 +84,7 @@ export const useGameStore = create<GameState>()(
       monsters: {},
       eggs: {},
       hasStarter: false,
+      lastBattle: null,
 
       chooseStarter: (speciesId, gender) => {
         if (get().hasStarter) return;
@@ -210,6 +223,47 @@ export const useGameStore = create<GameState>()(
           message: `${getSpecies(egg.speciesId).name}が生まれた！`,
           monsterId: monster.id,
         };
+      },
+
+      battleMonsters: (idA, idB) => {
+        const now = Date.now();
+        if (idA === idB) return { ok: false, message: '同じモンスター同士は戦えません' };
+        const { monsters } = get();
+        const a = monsters[idA];
+        const b = monsters[idB];
+        if (!a || !b) return { ok: false, message: 'モンスターが見つかりません' };
+        const checkA = canBattle(a, now);
+        if (!checkA.ok) return { ok: false, message: `${a.nickname}: ${checkA.reason}` };
+        const checkB = canBattle(b, now);
+        if (!checkB.ok) return { ok: false, message: `${b.nickname}: ${checkB.reason}` };
+
+        const result = simulateBattle(a, b);
+        const winner = monsters[result.winnerId];
+        const loser = monsters[result.loserId];
+        const winnerGain = addExp(winner.level, winner.exp, BATTLE_WIN_EXP);
+        const loserGain = addExp(loser.level, loser.exp, BATTLE_LOSE_EXP);
+
+        set((state) => ({
+          lastBattle: result,
+          monsters: {
+            ...state.monsters,
+            [winner.id]: {
+              ...winner,
+              level: winnerGain.level,
+              exp: winnerGain.exp,
+              affection: clampAffection(winner.affection + BATTLE_WIN_AFFECTION),
+              lastBattledAt: now,
+            },
+            [loser.id]: {
+              ...loser,
+              level: loserGain.level,
+              exp: loserGain.exp,
+              affection: clampAffection(loser.affection + BATTLE_LOSE_AFFECTION),
+              lastBattledAt: now,
+            },
+          },
+        }));
+        return { ok: true, message: `${winner.nickname}の勝利！`, monsterId: winner.id };
       },
     }),
     {

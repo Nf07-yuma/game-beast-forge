@@ -4,6 +4,7 @@ import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { useGameStore } from '@/store/gameStore';
 import { getSpecies } from '@/data/species';
 import { computeStats, expForLevel, COOLDOWNS } from '@/game/logic';
+import { BATTLE_COOLDOWN_MS } from '@/game/battle';
 import { useNow, formatDuration } from '@/hooks/useNow';
 import { MonsterAvatar } from '@/components/MonsterAvatar';
 import { ProgressBar } from '@/components/ProgressBar';
@@ -44,6 +45,9 @@ export default function MonsterDetailScreen() {
     : 0;
   const breedRemaining = monster.breedingCooldownUntil
     ? monster.breedingCooldownUntil - now
+    : 0;
+  const battleRemaining = monster.lastBattledAt
+    ? monster.lastBattledAt + BATTLE_COOLDOWN_MS - now
     : 0;
 
   function handleFeed() {
@@ -159,6 +163,9 @@ export default function MonsterDetailScreen() {
 
       {breedRemaining > 0 ? (
         <Text style={styles.cooldownNote}>交配クールダウン中: あと {formatDuration(breedRemaining)}</Text>
+      ) : null}
+      {battleRemaining > 0 ? (
+        <Text style={styles.cooldownNote}>バトルクールダウン中: あと {formatDuration(battleRemaining)}</Text>
       ) : null}
     </ScrollView>
   );
