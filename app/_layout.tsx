@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { theme } from '@/theme';
+import { ensureNotificationPermissions } from '@/notifications';
 
 export default function RootLayout() {
+  useEffect(() => {
+    ensureNotificationPermissions().catch(() => {});
+  }, []);
+
   return (
     <SafeAreaProvider>
       <StatusBar style="light" />

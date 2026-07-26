@@ -5,6 +5,7 @@ import { useGameStore } from '@/store/gameStore';
 import { getSpecies } from '@/data/species';
 import { computeStats, expForLevel, COOLDOWNS } from '@/game/logic';
 import { BATTLE_COOLDOWN_MS } from '@/game/battle';
+import { scheduleFeedReminder, scheduleTrainReminder } from '@/notifications';
 import { useNow, formatDuration } from '@/hooks/useNow';
 import { MonsterAvatar } from '@/components/MonsterAvatar';
 import { ProgressBar } from '@/components/ProgressBar';
@@ -52,12 +53,20 @@ export default function MonsterDetailScreen() {
 
   function handleFeed() {
     const result = feedMonster(monster.id);
-    if (!result.ok) Alert.alert('できません', result.message);
+    if (!result.ok) {
+      Alert.alert('できません', result.message);
+      return;
+    }
+    scheduleFeedReminder(monster.id, monster.nickname, COOLDOWNS.FEED_MS).catch(() => {});
   }
 
   function handleTrain() {
     const result = trainMonster(monster.id);
-    if (!result.ok) Alert.alert('できません', result.message);
+    if (!result.ok) {
+      Alert.alert('できません', result.message);
+      return;
+    }
+    scheduleTrainReminder(monster.id, monster.nickname, COOLDOWNS.TRAIN_MS).catch(() => {});
   }
 
   function saveName() {
