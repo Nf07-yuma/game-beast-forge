@@ -4,10 +4,12 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { theme } from '@/theme';
 import { ensureNotificationPermissions } from '@/notifications';
+import { initCloudSync } from '@/cloud/autoSync';
 
 export default function RootLayout() {
   useEffect(() => {
     ensureNotificationPermissions().catch(() => {});
+    initCloudSync();
   }, []);
 
   return (
