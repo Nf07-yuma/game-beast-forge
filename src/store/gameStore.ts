@@ -62,6 +62,7 @@ interface ActionResult {
   ok: boolean;
   message: string;
   monsterId?: string;
+  eggId?: string;
 }
 
 interface GameState {
@@ -193,7 +194,7 @@ export const useGameStore = create<GameState>()(
             [idB]: { ...b, breedingCooldownUntil: cooldownUntil },
           },
         }));
-        return { ok: true, message: 'タマゴが生まれた！温めて孵化を待とう' };
+        return { ok: true, message: 'タマゴが生まれた！温めて孵化を待とう', eggId: egg.id };
       },
 
       hatchEgg: (id) => {

@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useGameStore } from '@/store/gameStore';
 import { getSpecies } from '@/data/species';
 import { COOLDOWNS } from '@/game/logic';
+import { cancelHatchReminder } from '@/notifications';
 import { useNow, formatDuration } from '@/hooks/useNow';
 import { ProgressBar } from '@/components/ProgressBar';
 import { PrimaryButton } from '@/components/PrimaryButton';
@@ -39,6 +40,7 @@ export default function EggDetailScreen() {
       Alert.alert('まだ孵化しません', result.message);
       return;
     }
+    cancelHatchReminder(egg.id).catch(() => {});
     Alert.alert('おめでとう！', result.message, [
       {
         text: 'OK',

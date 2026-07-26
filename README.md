@@ -9,6 +9,7 @@
 - **交配（ブリーディング）**: レベル5以上、オスとメスのペアのみ交配可能。掛け合わせてタマゴを生み、孵化させて新しい子モンスターを迎える
   - 基本5属性（炎・水・草・電・岩）の全ての組み合わせ（10通り）に専用の希少種（ハイブリッド種）が用意されている
 - **バトル**: 自分が育てたモンスター同士を1対1で戦わせる。HP/ATK/DEF/SPDから毎ターンのダメージを計算するシンプルなターン制バトルで、勝者・敗者ともにEXP・なつき度を獲得する
+- **通知**: エサやり・トレーニングのクールダウンが終わったタイミングや、タマゴが孵化できるタイミングでローカル通知が届く（アプリ起動時に通知の許可を確認）
 - 図鑑（コレクション）でこれまでに育てたモンスター・タマゴを一覧で確認
 
 ## セットアップ
@@ -27,7 +28,7 @@ npm run typecheck   # 型チェック
 npm test             # ユニットテスト（Jest）
 ```
 
-`src/game/logic.ts`（育成・交配のロジック）、`src/game/battle.ts`（バトルロジック）、`src/data/species.ts`（種族データ）、`src/store/gameStore.ts`（ゲーム状態のストア）に対するユニットテストが `src/**/*.test.ts` にあります。プッシュ・プルリクエスト時には `.github/workflows/ci.yml` により型チェック・テスト・Androidバンドルのビルド確認・APKのビルドが自動実行されます。
+`src/game/logic.ts`（育成・交配のロジック）、`src/game/battle.ts`（バトルロジック）、`src/data/species.ts`（種族データ）、`src/store/gameStore.ts`（ゲーム状態のストア）、`src/notifications/index.ts`（通知スケジューリング。`expo-notifications` をモック）に対するユニットテストが `src/**/*.test.ts` にあります。プッシュ・プルリクエスト時には `.github/workflows/ci.yml` により型チェック・テスト・Androidバンドルのビルド確認・APKのビルドが自動実行されます。
 
 CIの `build-apk` ジョブは `expo prebuild` でネイティブAndroidプロジェクトを生成し、`./gradlew assembleRelease` で実際に `.apk` をビルドします。成功すると `beast-forge-apk` という名前でワークフロー実行のArtifactsからダウンロードできます（GitHubの Actions タブ → 該当のワークフロー実行 → Artifacts）。JSバンドルがAPKに埋め込まれているため、Metro（開発サーバー）を起動していなくても実機単体でインストール・起動できます。ただし署名は開発用の自動生成キーのため、そのままではPlayストアには提出できません（提出用の正式なリリースビルドは下記の方法をお使いください）。
 
@@ -87,11 +88,11 @@ src/
   game/logic.ts          育成・交配のゲームロジック
   game/battle.ts          バトルのシミュレーションロジック
   store/gameStore.ts      Zustandストア（永続化含む）
+  notifications/index.ts   ローカル通知（エサ・トレーニング・孵化リマインダー）
   components/            UIコンポーネント
   hooks/useNow.ts        クールダウン表示用のタイマーフック
 ```
 
 ## 今後の拡張候補
 
-- プッシュ通知（エサやり・孵化タイミングの通知）
 - クラウド同期・複数端末対応

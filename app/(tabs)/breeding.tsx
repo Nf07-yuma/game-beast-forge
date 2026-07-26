@@ -2,7 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useGameStore } from '@/store/gameStore';
 import { getSpecies, HYBRID_TABLE } from '@/data/species';
-import { canBreed, canBreedPair } from '@/game/logic';
+import { canBreed, canBreedPair, COOLDOWNS } from '@/game/logic';
+import { scheduleHatchReminder } from '@/notifications';
 import { useNow } from '@/hooks/useNow';
 import { MonsterCard } from '@/components/MonsterCard';
 import { PrimaryButton } from '@/components/PrimaryButton';
@@ -32,7 +33,12 @@ export default function BreedingScreen() {
     if (selected.length !== 2) return;
     const result = breedMonsters(selected[0], selected[1]);
     Alert.alert(result.ok ? 'こうはい成功' : 'こうはい失敗', result.message);
-    if (result.ok) setSelected([]);
+    if (result.ok) {
+      setSelected([]);
+      if (result.eggId) {
+        scheduleHatchReminder(result.eggId, COOLDOWNS.EGG_HATCH_MS).catch(() => {});
+      }
+    }
   }
 
   const parentA = selected[0] ? monsters[selected[0]] : null;
