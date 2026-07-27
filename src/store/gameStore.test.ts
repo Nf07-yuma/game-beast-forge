@@ -280,6 +280,7 @@ describe('pullGacha', () => {
     expect(SPECIES[egg.speciesId]).toBeDefined();
     expect(egg.parentIds).toBeUndefined();
     expect(state.lastGachaAt).not.toBeNull();
+    expect(result.rare).toBe(SPECIES[egg.speciesId].element === 'mystic');
   });
 
   it('enforces a cooldown between pulls', () => {

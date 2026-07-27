@@ -69,6 +69,7 @@ interface ActionResult {
   message: string;
   monsterId?: string;
   eggId?: string;
+  rare?: boolean;
 }
 
 interface GameState {
@@ -320,6 +321,7 @@ export const useGameStore = create<GameState>()(
           ok: true,
           message: rare ? '✨希少なタマゴが出た！✨' : 'タマゴを手に入れた！',
           eggId: egg.id,
+          rare,
         };
       },
 
