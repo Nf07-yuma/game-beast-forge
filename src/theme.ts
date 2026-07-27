@@ -1,19 +1,23 @@
+import { ViewStyle } from 'react-native';
+
 export const theme = {
   colors: {
-    background: '#101322',
-    surface: '#1B2036',
-    surfaceAlt: '#242B47',
-    border: '#323A5C',
-    text: '#F4F6FB',
-    textMuted: '#9AA3C7',
-    primary: '#7C6CF0',
-    primaryMuted: '#4B4390',
+    background: '#05060F',
+    surface: '#12142C',
+    surfaceAlt: '#1B1E42',
+    border: '#2B2E5C',
+    text: '#EAF0FF',
+    textMuted: '#7A85C0',
+    primary: '#8A5CFF',
+    primaryMuted: '#4B3399',
     accent: '#F5C93B',
-    success: '#5FBF63',
-    danger: '#E0554F',
-    heart: '#F0668C',
-    male: '#4EA1F0',
-    female: '#F0669E',
+    neonCyan: '#2EF2FF',
+    neonPink: '#FF2E9A',
+    success: '#39FF88',
+    danger: '#FF3860',
+    heart: '#FF3DA6',
+    male: '#3DA9FF',
+    female: '#FF4FA3',
   },
   radius: {
     sm: 8,
@@ -21,6 +25,16 @@ export const theme = {
     lg: 22,
   },
   spacing: (n: number) => n * 4,
+  /** Soft colored glow for highlighting an interactive or "special" element. */
+  glow(color: string, opacity = 0.55, radius = 10): ViewStyle {
+    return {
+      shadowColor: color,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: opacity,
+      shadowRadius: radius,
+      elevation: 6,
+    };
+  },
 };
 
 export const ELEMENT_LABELS: Record<string, string> = {

@@ -81,8 +81,9 @@ export function GachaReveal({ visible, rare, message, onClaim }: Props) {
   const flashOpacity = flash.interpolate({ inputRange: [0, 1], outputRange: [0.9, 0] });
 
   const gradientColors = rare
-    ? (['#F5C93B', '#C98A1F'] as const)
-    : (['#4B4390', '#242B47'] as const);
+    ? ([theme.colors.accent, '#C98A1F'] as const)
+    : ([theme.colors.primary, theme.colors.primaryMuted] as const);
+  const glowColor = rare ? theme.colors.accent : theme.colors.primary;
 
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -91,7 +92,9 @@ export function GachaReveal({ visible, rare, message, onClaim }: Props) {
           {stage === 'rolling' ? (
             <>
               <Animated.View style={[styles.flashCircle, { transform: [{ scale: flashScale }], opacity: flashOpacity }]} />
-              <Animated.View style={[styles.capsule, { transform: [{ rotate: shakeRotate }] }]}>
+              <Animated.View
+                style={[styles.capsule, theme.glow(glowColor, 0.7, 18), { transform: [{ rotate: shakeRotate }] }]}
+              >
                 <LinearGradient colors={gradientColors} style={styles.capsuleGradient}>
                   <Text style={styles.capsuleEmoji}>🎁</Text>
                 </LinearGradient>
@@ -118,7 +121,10 @@ export function GachaReveal({ visible, rare, message, onClaim }: Props) {
                     );
                   })
                 : null}
-              <LinearGradient colors={gradientColors} style={styles.resultCircle}>
+              <LinearGradient
+                colors={gradientColors}
+                style={[styles.resultCircle, theme.glow(glowColor, 0.75, 20)]}
+              >
                 <Text style={styles.resultEmoji}>🥚</Text>
               </LinearGradient>
               {rare ? (
