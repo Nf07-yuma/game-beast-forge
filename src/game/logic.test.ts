@@ -30,6 +30,7 @@ function makeMonster(overrides: Partial<Monster> = {}): Monster {
     lastFedAt: null,
     lastTrainedAt: null,
     lastBattledAt: null,
+    lastExploredAt: null,
     breedingCooldownUntil: null,
     ...overrides,
   };

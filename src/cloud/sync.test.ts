@@ -132,6 +132,7 @@ describe('pushToCloud', () => {
     const result = await pushToCloud('AB3DEFGH', {
       monsters: {},
       eggs: {},
+      items: {},
       hasStarter: true,
     });
     expect(result.ok).toBe(true);
@@ -143,7 +144,7 @@ describe('pushToCloud', () => {
 
   it('reports failure when the write throws', async () => {
     mockSetDoc.mockRejectedValue(new Error('offline'));
-    const result = await pushToCloud('AB3DEFGH', { monsters: {}, eggs: {}, hasStarter: false });
+    const result = await pushToCloud('AB3DEFGH', { monsters: {}, eggs: {}, items: {}, hasStarter: false });
     expect(result.ok).toBe(false);
   });
 });
@@ -155,7 +156,7 @@ describe('pullFromCloud', () => {
   });
 
   it('returns the stored data when the document exists', async () => {
-    const payload = { monsters: {}, eggs: {}, hasStarter: true, updatedAt: 12345 };
+    const payload = { monsters: {}, eggs: {}, items: {}, hasStarter: true, updatedAt: 12345 };
     mockGetDoc.mockResolvedValue({ exists: () => true, data: () => payload });
     const result = await pullFromCloud('AB3DEFGH');
     expect(result.ok).toBe(true);

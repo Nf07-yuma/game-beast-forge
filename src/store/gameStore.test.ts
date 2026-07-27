@@ -2,6 +2,7 @@ import { useGameStore } from './gameStore';
 import { COOLDOWNS, MIN_BREED_LEVEL } from '@/game/logic';
 import { BATTLE_COOLDOWN_MS } from '@/game/battle';
 import { GACHA_COOLDOWN_MS } from '@/game/gacha';
+import { EXPLORE_COOLDOWN_MS } from '@/game/dungeon';
 import { SPECIES } from '@/data/species';
 import { Monster } from '@/types';
 
@@ -20,6 +21,7 @@ function makeMonster(overrides: Partial<Monster> = {}): Monster {
     lastFedAt: null,
     lastTrainedAt: null,
     lastBattledAt: null,
+    lastExploredAt: null,
     breedingCooldownUntil: null,
     ...overrides,
   };
@@ -29,6 +31,7 @@ beforeEach(() => {
   useGameStore.setState({
     monsters: {},
     eggs: {},
+    items: {},
     hasStarter: false,
     lastBattle: null,
     lastGachaAt: null,
@@ -291,5 +294,69 @@ describe('pullGacha', () => {
     jest.setSystemTime(new Date(Date.now() + GACHA_COOLDOWN_MS + 1));
     expect(useGameStore.getState().pullGacha().ok).toBe(true);
     expect(Object.keys(useGameStore.getState().eggs)).toHaveLength(2);
+  });
+});
+
+describe('exploreDungeon', () => {
+  it('fails for an unknown monster id', () => {
+    expect(useGameStore.getState().exploreDungeon('does-not-exist', 'volcano').ok).toBe(false);
+  });
+
+  it('grants EXP and sets the cooldown', () => {
+    useGameStore.setState({ monsters: { m1: makeMonster({ exp: 0 }) } });
+    const result = useGameStore.getState().exploreDungeon('m1', 'volcano');
+    expect(result.ok).toBe(true);
+    const monster = useGameStore.getState().monsters.m1;
+    expect(monster.exp + monster.level).toBeGreaterThan(0);
+    expect(monster.lastExploredAt).not.toBeNull();
+  });
+
+  it('enforces a cooldown between explorations for the same monster', () => {
+    useGameStore.setState({ monsters: { m1: makeMonster() } });
+    useGameStore.getState().exploreDungeon('m1', 'volcano');
+    expect(useGameStore.getState().exploreDungeon('m1', 'volcano').ok).toBe(false);
+  });
+
+  it('allows exploring again once the cooldown has elapsed', () => {
+    useGameStore.setState({ monsters: { m1: makeMonster() } });
+    useGameStore.getState().exploreDungeon('m1', 'volcano');
+    jest.setSystemTime(new Date(Date.now() + EXPLORE_COOLDOWN_MS + 1));
+    expect(useGameStore.getState().exploreDungeon('m1', 'volcano').ok).toBe(true);
+  });
+
+  it('only ever adds the drop item matching the dungeon explored', () => {
+    useGameStore.setState({ monsters: { m1: makeMonster() } });
+    jest.spyOn(Math, 'random').mockReturnValue(0); // guarantees a drop
+    useGameStore.getState().exploreDungeon('m1', 'volcano');
+    expect(useGameStore.getState().items).toEqual({ fire_stone: 1 });
+    jest.restoreAllMocks();
+  });
+});
+
+describe('evolveMonster', () => {
+  it('fails for an unknown monster id', () => {
+    expect(useGameStore.getState().evolveMonster('does-not-exist').ok).toBe(false);
+  });
+
+  it('refuses to evolve without enough of the required item', () => {
+    useGameStore.setState({
+      monsters: { m1: makeMonster({ speciesId: 'emberpup', level: 10 }) },
+      items: { fire_stone: 2 },
+    });
+    const result = useGameStore.getState().evolveMonster('m1');
+    expect(result.ok).toBe(false);
+    expect(useGameStore.getState().monsters.m1.speciesId).toBe('emberpup');
+  });
+
+  it('evolves the monster and consumes the required items', () => {
+    useGameStore.setState({
+      monsters: { m1: makeMonster({ speciesId: 'emberpup', level: 10 }) },
+      items: { fire_stone: 5 },
+    });
+    const result = useGameStore.getState().evolveMonster('m1');
+    expect(result.ok).toBe(true);
+    const state = useGameStore.getState();
+    expect(state.monsters.m1.speciesId).toBe('emberwolf');
+    expect(state.items.fire_stone).toBe(2);
   });
 });

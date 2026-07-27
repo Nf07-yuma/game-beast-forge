@@ -11,6 +11,7 @@ export const MIN_SYNC_PASSWORD_LENGTH = 4;
 export interface CloudPayload {
   monsters: Record<string, Monster>;
   eggs: Record<string, Egg>;
+  items: Record<string, number>;
   hasStarter: boolean;
   updatedAt: number;
 }

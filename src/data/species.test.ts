@@ -1,4 +1,5 @@
-import { getSpecies, HYBRID_TABLE, SPECIES, STARTER_SPECIES_IDS } from './species';
+import { EVOLUTION_TABLE, getSpecies, HYBRID_TABLE, SPECIES, STARTER_SPECIES_IDS } from './species';
+import { ITEMS } from './items';
 
 describe('SPECIES table', () => {
   it('gives every species a self-consistent id and positive stats', () => {
@@ -42,6 +43,36 @@ describe('SPECIES table', () => {
         const hasCombo = `${a}+${b}` in HYBRID_TABLE || `${b}+${a}` in HYBRID_TABLE;
         expect(hasCombo).toBe(true);
       }
+    }
+  });
+});
+
+describe('EVOLUTION_TABLE', () => {
+  it('only maps base (non-mystic) species to evolutions', () => {
+    for (const sourceId of Object.keys(EVOLUTION_TABLE)) {
+      expect(SPECIES[sourceId]).toBeDefined();
+      expect(SPECIES[sourceId].element).not.toBe('mystic');
+    }
+  });
+
+  it('points at a real target species with the same element and a real item', () => {
+    for (const [sourceId, req] of Object.entries(EVOLUTION_TABLE)) {
+      const target = SPECIES[req.targetId];
+      expect(target).toBeDefined();
+      expect(target.element).toBe(SPECIES[sourceId].element);
+      expect(ITEMS[req.itemId]).toBeDefined();
+      expect(req.itemCount).toBeGreaterThan(0);
+      expect(req.minLevel).toBeGreaterThan(0);
+    }
+  });
+
+  it('gives evolved species strictly higher base stats than their pre-evolution', () => {
+    for (const [sourceId, req] of Object.entries(EVOLUTION_TABLE)) {
+      const base = SPECIES[sourceId].baseStats;
+      const evolved = SPECIES[req.targetId].baseStats;
+      const baseTotal = base.hp + base.atk + base.def + base.spd;
+      const evolvedTotal = evolved.hp + evolved.atk + evolved.def + evolved.spd;
+      expect(evolvedTotal).toBeGreaterThan(baseTotal);
     }
   });
 });
