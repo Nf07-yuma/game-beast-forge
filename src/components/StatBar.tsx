@@ -31,6 +31,7 @@ const styles = StyleSheet.create({
   label: {
     width: 36,
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
     fontWeight: '600',
   },

@@ -125,11 +125,13 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
     marginBottom: 16,
   },
   sectionTitle: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
     fontWeight: '700',
     marginBottom: 10,
@@ -138,6 +140,7 @@ const styles = StyleSheet.create({
   },
   empty: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
   },
   previewCard: {
@@ -169,6 +172,7 @@ const styles = StyleSheet.create({
   },
   emptySlotText: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 20,
   },
   plus: {

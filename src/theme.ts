@@ -1,10 +1,11 @@
-import { ViewStyle } from 'react-native';
+import { TextStyle, ViewStyle } from 'react-native';
 
 export const theme = {
   colors: {
     background: '#05060F',
-    surface: '#12142C',
-    surfaceAlt: '#1B1E42',
+    // Translucent so the animated background shows through cards/sections.
+    surface: 'rgba(18, 20, 44, 0.82)',
+    surfaceAlt: 'rgba(27, 30, 66, 0.82)',
     border: '#2B2E5C',
     text: '#EAF0FF',
     textMuted: '#7A85C0',
@@ -33,6 +34,14 @@ export const theme = {
       shadowOpacity: opacity,
       shadowRadius: radius,
       elevation: 6,
+    };
+  },
+  /** Keeps muted text legible when it sits over the animated background. */
+  textShadow(): TextStyle {
+    return {
+      textShadowColor: 'rgba(0, 0, 0, 0.65)',
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 3,
     };
   },
 };

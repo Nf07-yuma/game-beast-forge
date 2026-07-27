@@ -242,6 +242,7 @@ const styles = StyleSheet.create({
   },
   notFound: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     padding: 20,
   },
   header: {
@@ -290,6 +291,7 @@ const styles = StyleSheet.create({
   },
   generation: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
     marginTop: 8,
   },
@@ -314,6 +316,7 @@ const styles = StyleSheet.create({
   },
   expText: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
   },
   evolutionRow: {
@@ -333,6 +336,7 @@ const styles = StyleSheet.create({
   },
   evolutionReq: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
     lineHeight: 17,
   },
@@ -352,6 +356,7 @@ const styles = StyleSheet.create({
   },
   cooldownNote: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
     textAlign: 'center',
     marginTop: 16,

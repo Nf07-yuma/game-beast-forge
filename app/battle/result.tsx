@@ -130,6 +130,7 @@ const styles = StyleSheet.create({
   },
   notFound: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     padding: 20,
   },
   resultBanner: {
@@ -168,6 +169,7 @@ const styles = StyleSheet.create({
   },
   loserLabel: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
     fontWeight: '800',
     marginTop: 2,
@@ -179,6 +181,7 @@ const styles = StyleSheet.create({
   },
   hpText: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 11,
   },
   section: {
@@ -197,11 +200,13 @@ const styles = StyleSheet.create({
   },
   rewardText: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
     marginBottom: 6,
   },
   logLine: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
     marginBottom: 6,
     lineHeight: 17,

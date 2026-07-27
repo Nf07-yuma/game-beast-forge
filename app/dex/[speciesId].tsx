@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
   },
   notFound: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     padding: 20,
   },
   header: {
@@ -103,6 +104,7 @@ const styles = StyleSheet.create({
   },
   ownedCount: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
     marginTop: 10,
   },
@@ -122,6 +124,7 @@ const styles = StyleSheet.create({
   },
   description: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
     lineHeight: 19,
   },

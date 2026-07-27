@@ -48,6 +48,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
     fontWeight: '700',
     marginBottom: 10,

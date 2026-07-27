@@ -328,16 +328,19 @@ const styles = StyleSheet.create({
   },
   bgDesc: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 11,
     lineHeight: 15,
   },
   notConfigured: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
     lineHeight: 19,
   },
   helpText: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
     lineHeight: 18,
     marginBottom: 12,
@@ -352,6 +355,7 @@ const styles = StyleSheet.create({
   },
   syncedAt: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 11,
     textAlign: 'center',
     marginTop: 10,

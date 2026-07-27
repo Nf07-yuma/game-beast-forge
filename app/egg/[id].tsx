@@ -93,6 +93,7 @@ const styles = StyleSheet.create({
   },
   notFound: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
   },
   emoji: {
     fontSize: 84,
@@ -107,11 +108,13 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
     marginTop: 12,
   },
   parents: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
     marginTop: 24,
   },

@@ -61,6 +61,7 @@ const styles = StyleSheet.create({
   },
   progress: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
     marginBottom: 16,
   },
@@ -104,6 +105,7 @@ const styles = StyleSheet.create({
   },
   nameUndiscovered: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontWeight: '600',
   },
 });

@@ -131,6 +131,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
     lineHeight: 18,
     marginBottom: 16,
@@ -187,6 +188,7 @@ const styles = StyleSheet.create({
   },
   pullLabelDisabled: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
   },
   section: {
     backgroundColor: theme.colors.surface,
@@ -203,6 +205,7 @@ const styles = StyleSheet.create({
   },
   rateText: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
     marginBottom: 4,
   },

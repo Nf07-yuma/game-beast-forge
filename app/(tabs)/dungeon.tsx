@@ -110,12 +110,14 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
     lineHeight: 18,
     marginBottom: 16,
   },
   sectionTitle: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
     fontWeight: '700',
     marginBottom: 10,
@@ -124,6 +126,7 @@ const styles = StyleSheet.create({
   },
   empty: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
   },
   dungeonCard: {
@@ -153,6 +156,7 @@ const styles = StyleSheet.create({
   },
   dungeonDesc: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
     lineHeight: 17,
     marginBottom: 4,

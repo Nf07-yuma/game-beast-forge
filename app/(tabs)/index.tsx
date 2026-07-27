@@ -124,6 +124,7 @@ const styles = StyleSheet.create({
   },
   switchLabel: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
     fontWeight: '700',
   },
@@ -141,6 +142,7 @@ const styles = StyleSheet.create({
   },
   starterSubtitle: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
     marginBottom: 20,
   },
@@ -166,6 +168,7 @@ const styles = StyleSheet.create({
   },
   starterDesc: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
     lineHeight: 17,
   },
