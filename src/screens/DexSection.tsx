@@ -5,7 +5,7 @@ import { useGameStore } from '@/store/gameStore';
 import { SPECIES } from '@/data/species';
 import { theme } from '@/theme';
 
-export default function DexScreen() {
+export function DexSection() {
   const router = useRouter();
   const monsters = useGameStore((s) => s.monsters);
 
@@ -16,7 +16,6 @@ export default function DexScreen() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>図鑑</Text>
         <Text style={styles.progress}>
           {discoveredCount} / {speciesList.length} 種を発見
         </Text>
@@ -60,12 +59,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 16,
     paddingBottom: 40,
-  },
-  title: {
-    color: theme.colors.text,
-    fontSize: 20,
-    fontWeight: '800',
-    marginBottom: 4,
   },
   progress: {
     color: theme.colors.textMuted,

@@ -25,15 +25,8 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'コレクション',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="📖" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="dex"
-        options={{
-          title: '図鑑',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="📚" focused={focused} />,
+          title: 'モンスター',
+          tabBarIcon: ({ focused }) => <TabIcon emoji="🐾" focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -41,13 +34,6 @@ export default function TabsLayout() {
         options={{
           title: 'ガチャ',
           tabBarIcon: ({ focused }) => <TabIcon emoji="🎁" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="breeding"
-        options={{
-          title: '交配',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="💞" focused={focused} />,
         }}
       />
       <Tabs.Screen

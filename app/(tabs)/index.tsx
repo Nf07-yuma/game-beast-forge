@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useGameStore } from '@/store/gameStore';
 import { SPECIES, STARTER_SPECIES_IDS } from '@/data/species';
 import { MonsterAvatar } from '@/components/MonsterAvatar';
-import { MonsterCard } from '@/components/MonsterCard';
-import { EggCard } from '@/components/EggCard';
+import { CollectionSection } from '@/screens/CollectionSection';
+import { BreedingSection } from '@/screens/BreedingSection';
+import { DexSection } from '@/screens/DexSection';
 import { theme } from '@/theme';
 
 function StarterPicker() {
@@ -44,11 +44,17 @@ function StarterPicker() {
   );
 }
 
-export default function CollectionScreen() {
-  const router = useRouter();
+type Section = 'collection' | 'breeding' | 'dex';
+
+const SECTIONS: { key: Section; label: string }[] = [
+  { key: 'collection', label: 'コレクション' },
+  { key: 'breeding', label: '交配' },
+  { key: 'dex', label: '図鑑' },
+];
+
+export default function MonsterScreen() {
   const hasStarter = useGameStore((s) => s.hasStarter);
-  const monsters = useGameStore((s) => s.monsters);
-  const eggs = useGameStore((s) => s.eggs);
+  const [section, setSection] = useState<Section>('collection');
 
   if (!hasStarter) {
     return (
@@ -60,29 +66,24 @@ export default function CollectionScreen() {
     );
   }
 
-  const monsterList = Object.values(monsters).sort((a, b) => b.createdAt - a.createdAt);
-  const eggList = Object.values(eggs).sort((a, b) => a.hatchAt - b.hatchAt);
-
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {eggList.length > 0 ? (
-          <>
-            <Text style={styles.sectionTitle}>タマゴ</Text>
-            {eggList.map((egg) => (
-              <EggCard key={egg.id} egg={egg} onPress={() => router.push(`/egg/${egg.id}`)} />
-            ))}
-          </>
-        ) : null}
-        <Text style={styles.sectionTitle}>モンスター（{monsterList.length}）</Text>
-        {monsterList.map((monster) => (
-          <MonsterCard
-            key={monster.id}
-            monster={monster}
-            onPress={() => router.push(`/monster/${monster.id}`)}
-          />
+      <View style={styles.switcher}>
+        {SECTIONS.map((s) => (
+          <Pressable
+            key={s.key}
+            style={[styles.switchButton, section === s.key && styles.switchButtonActive]}
+            onPress={() => setSection(s.key)}
+          >
+            <Text style={[styles.switchLabel, section === s.key && styles.switchLabelActive]}>
+              {s.label}
+            </Text>
+          </Pressable>
         ))}
-      </ScrollView>
+      </View>
+      {section === 'collection' ? <CollectionSection /> : null}
+      {section === 'breeding' ? <BreedingSection /> : null}
+      {section === 'dex' ? <DexSection /> : null}
     </View>
   );
 }
@@ -96,13 +97,32 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 40,
   },
-  sectionTitle: {
+  switcher: {
+    flexDirection: 'row',
+    padding: 4,
+    margin: 16,
+    marginBottom: 0,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  switchButton: {
+    flex: 1,
+    paddingVertical: 9,
+    borderRadius: theme.radius.sm,
+    alignItems: 'center',
+  },
+  switchButtonActive: {
+    backgroundColor: theme.colors.primary,
+  },
+  switchLabel: {
     color: theme.colors.textMuted,
     fontSize: 13,
     fontWeight: '700',
-    marginBottom: 10,
-    marginTop: 8,
-    textTransform: 'uppercase',
+  },
+  switchLabelActive: {
+    color: theme.colors.text,
   },
   starterWrap: {
     paddingTop: 16,
