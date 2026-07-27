@@ -3,14 +3,17 @@ rules_version = '2';
 // Beast Forge cloud sync rules.
 //
 // There is no per-user login — any authenticated (including anonymous)
-// client can read/write any players/{code} document, because the sync code
-// itself (an 8-character random string the app generates) is the practical
-// secret that scopes access to a given save. This is a deliberate,
-// low-friction tradeoff appropriate for casual game data; it is not
-// suitable for anything sensitive.
+// client can read/write any players/{key} document. What scopes access to a
+// given save is the document key itself: the app derives it client-side as
+// SHA-256(syncCode + ":" + password) (see src/cloud/sync.ts), so knowing the
+// 8-character sync code alone isn't enough to read or overwrite someone
+// else's save — the password (never stored anywhere, including here) is
+// also required to reproduce the key. This is a deliberate, low-friction
+// tradeoff appropriate for casual game data; it is not suitable for
+// anything sensitive.
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /players/{code} {
+    match /players/{key} {
       allow read, write: if request.auth != null;
     }
   }

@@ -3,7 +3,15 @@ import { View, Text, StyleSheet, ScrollView, TextInput, Alert } from 'react-nati
 import * as Clipboard from 'expo-clipboard';
 import { useGameStore } from '@/store/gameStore';
 import { isFirebaseConfigured } from '@/cloud/firebase';
-import { generateSyncCode, normalizeSyncCode, pullFromCloud, pushToCloud } from '@/cloud/sync';
+import {
+  MIN_SYNC_PASSWORD_LENGTH,
+  deriveSyncKey,
+  generateSyncCode,
+  isValidSyncPassword,
+  normalizeSyncCode,
+  pullFromCloud,
+  pushToCloud,
+} from '@/cloud/sync';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { theme } from '@/theme';
 
@@ -25,20 +33,28 @@ export default function SettingsScreen() {
   const applyCloudData = useGameStore((s) => s.applyCloudData);
   const [syncing, setSyncing] = useState(false);
   const [codeInput, setCodeInput] = useState('');
+  const [createPassword, setCreatePassword] = useState('');
+  const [restorePassword, setRestorePassword] = useState('');
 
   async function handleCreateCode() {
+    if (!isValidSyncPassword(createPassword)) return;
     setSyncing(true);
     const code = generateSyncCode();
+    const key = await deriveSyncKey(code, createPassword);
     const { monsters, eggs, hasStarter } = useGameStore.getState();
-    const result = await pushToCloud(code, { monsters, eggs, hasStarter });
+    const result = await pushToCloud(key, { monsters, eggs, hasStarter });
     setSyncing(false);
     if (!result.ok) {
       Alert.alert('発行できませんでした', result.message ?? '');
       return;
     }
-    setSyncCode(code);
+    setSyncCode(code, key);
     useGameStore.setState({ lastSyncedAt: Date.now() });
-    Alert.alert('同期コードを発行しました', `他の端末で「${code}」を入力すると引き継げます。`);
+    setCreatePassword('');
+    Alert.alert(
+      '同期コードを発行しました',
+      `他の端末で「${code}」と今設定したパスワードの両方を入力すると引き継げます。パスワードは保存されないので、忘れずに控えてください。`
+    );
   }
 
   async function handleCopyCode() {
@@ -49,7 +65,7 @@ export default function SettingsScreen() {
 
   function handleRestore() {
     const code = normalizeSyncCode(codeInput);
-    if (!code) return;
+    if (!code || !isValidSyncPassword(restorePassword)) return;
     Alert.alert(
       'このコードのデータを引き継ぎますか?',
       `コード「${code}」のデータで、この端末のモンスター・タマゴを上書きします。この操作は元に戻せません。`,
@@ -60,7 +76,8 @@ export default function SettingsScreen() {
           style: 'destructive',
           onPress: async () => {
             setSyncing(true);
-            const result = await pullFromCloud(code);
+            const key = await deriveSyncKey(code, restorePassword);
+            const result = await pullFromCloud(key);
             setSyncing(false);
             if (!result.ok || !result.data) {
               Alert.alert('引き継げませんでした', result.message ?? '');
@@ -74,8 +91,9 @@ export default function SettingsScreen() {
               },
               result.data.updatedAt
             );
-            setSyncCode(code);
+            setSyncCode(code, key);
             setCodeInput('');
+            setRestorePassword('');
             Alert.alert('引き継ぎました', 'この端末のデータを復元しました。');
           },
         },
@@ -103,7 +121,7 @@ export default function SettingsScreen() {
                 <>
                   <Text style={styles.code}>{syncCode}</Text>
                   <Text style={styles.helpText}>
-                    別の端末で下の「コードを入力して引き継ぐ」にこのコードを入力すると、この端末のデータを引き継げます。
+                    別の端末で下の「コードを入力して引き継ぐ」に、このコードと発行時に設定したパスワードの両方を入力すると、この端末のデータを引き継げます。パスワードはこの画面には表示されません（保存されていないため）。
                   </Text>
                   <PrimaryButton
                     label="コードをコピー"
@@ -119,11 +137,21 @@ export default function SettingsScreen() {
                 <>
                   <Text style={styles.helpText}>
                     同期コードを発行すると、この端末のデータがクラウドに保存され、他の端末に引き継げるようになります。
+                    コードだけでなくパスワードも必要にすることで、他の人がコードを推測しても勝手に引き継げないようにしています。パスワードは保存されないので、忘れずに控えてください。
                   </Text>
+                  <TextInput
+                    style={styles.input}
+                    value={createPassword}
+                    onChangeText={setCreatePassword}
+                    placeholder={`パスワード (${MIN_SYNC_PASSWORD_LENGTH}文字以上)`}
+                    placeholderTextColor={theme.colors.textMuted}
+                    secureTextEntry
+                    autoCapitalize="none"
+                  />
                   <PrimaryButton
                     label="同期コードを発行する"
                     onPress={handleCreateCode}
-                    disabled={syncing}
+                    disabled={syncing || !isValidSyncPassword(createPassword)}
                     style={styles.button}
                   />
                 </>
@@ -133,7 +161,7 @@ export default function SettingsScreen() {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>コードを入力して引き継ぐ</Text>
               <Text style={styles.helpText}>
-                別の端末で発行した同期コードを入力すると、この端末のデータをそのデータで上書きします。
+                別の端末で発行した同期コードとパスワードを入力すると、この端末のデータをそのデータで上書きします。
               </Text>
               <TextInput
                 style={styles.input}
@@ -144,10 +172,19 @@ export default function SettingsScreen() {
                 autoCapitalize="characters"
                 maxLength={12}
               />
+              <TextInput
+                style={styles.input}
+                value={restorePassword}
+                onChangeText={setRestorePassword}
+                placeholder="パスワード"
+                placeholderTextColor={theme.colors.textMuted}
+                secureTextEntry
+                autoCapitalize="none"
+              />
               <PrimaryButton
                 label="引き継ぐ"
                 onPress={handleRestore}
-                disabled={syncing || !codeInput.trim()}
+                disabled={syncing || !codeInput.trim() || !isValidSyncPassword(restorePassword)}
                 variant="danger"
                 style={styles.button}
               />
