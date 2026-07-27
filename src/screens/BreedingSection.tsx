@@ -10,7 +10,7 @@ import { PrimaryButton } from '@/components/PrimaryButton';
 import { MonsterAvatar } from '@/components/MonsterAvatar';
 import { theme, GENDER_SYMBOLS } from '@/theme';
 
-export default function BreedingScreen() {
+export function BreedingSection() {
   const monsters = useGameStore((s) => s.monsters);
   const breedMonsters = useGameStore((s) => s.breedMonsters);
   const now = useNow();
