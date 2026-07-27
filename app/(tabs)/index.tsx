@@ -72,7 +72,10 @@ export default function MonsterScreen() {
         {SECTIONS.map((s) => (
           <Pressable
             key={s.key}
-            style={[styles.switchButton, section === s.key && styles.switchButtonActive]}
+            style={[
+              styles.switchButton,
+              section === s.key && [styles.switchButtonActive, theme.glow(theme.colors.primary, 0.5, 6)],
+            ]}
             onPress={() => setSection(s.key)}
           >
             <Text style={[styles.switchLabel, section === s.key && styles.switchLabelActive]}>

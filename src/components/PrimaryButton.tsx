@@ -27,6 +27,8 @@ export function PrimaryButton({
         ? theme.colors.danger
         : theme.colors.surfaceAlt;
 
+  const glowColor = variant === 'primary' ? theme.colors.primary : variant === 'danger' ? theme.colors.danger : null;
+
   return (
     <Pressable
       onPress={onPress}
@@ -34,6 +36,7 @@ export function PrimaryButton({
       style={({ pressed }) => [
         styles.button,
         { backgroundColor, opacity: pressed && !disabled ? 0.8 : 1 },
+        !disabled && glowColor ? theme.glow(glowColor, 0.5, 10) : null,
         style,
       ]}
     >

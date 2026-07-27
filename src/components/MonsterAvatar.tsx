@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Species } from '@/types';
+import { theme } from '@/theme';
 
 interface Props {
   species: Species;
@@ -12,6 +13,7 @@ export function MonsterAvatar({ species, size = 72 }: Props) {
     <View
       style={[
         styles.circle,
+        theme.glow(species.color, 0.5, size * 0.28),
         {
           width: size,
           height: size,

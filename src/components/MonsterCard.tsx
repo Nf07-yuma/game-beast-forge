@@ -22,7 +22,10 @@ export function MonsterCard({ monster, onPress, selected, disabled, disabledReas
       disabled={disabled}
       style={[
         styles.card,
-        selected && { borderColor: theme.colors.primary, borderWidth: 2 },
+        selected && [
+          { borderColor: theme.colors.primary, borderWidth: 2 },
+          theme.glow(theme.colors.primary, 0.4, 8),
+        ],
         disabled && styles.cardDisabled,
       ]}
     >

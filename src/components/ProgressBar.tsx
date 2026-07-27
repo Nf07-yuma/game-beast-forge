@@ -16,6 +16,7 @@ export function ProgressBar({ ratio, color = theme.colors.accent, height = 8, st
       <View
         style={[
           styles.fill,
+          theme.glow(color, 0.65, height),
           { width: `${clamped * 100}%`, backgroundColor: color, borderRadius: height / 2 },
         ]}
       />
@@ -27,7 +28,6 @@ const styles = StyleSheet.create({
   track: {
     width: '100%',
     backgroundColor: theme.colors.surfaceAlt,
-    overflow: 'hidden',
   },
   fill: {
     height: '100%',

@@ -58,9 +58,15 @@ export default function GachaScreen() {
         </Text>
 
         <View style={styles.card}>
-          <Animated.View style={{ transform: [{ scale: pulseScale }] }}>
+          <Animated.View
+            style={[
+              styles.capsuleWrap,
+              theme.glow(theme.colors.primary, 0.6, 16),
+              { transform: [{ scale: pulseScale }] },
+            ]}
+          >
             <LinearGradient
-              colors={['#7C6CF0', '#4B4390']}
+              colors={[theme.colors.primary, theme.colors.primaryMuted]}
               style={styles.capsuleGradient}
             >
               <Text style={styles.emoji}>🎁</Text>
@@ -69,10 +75,14 @@ export default function GachaScreen() {
           <Pressable
             onPress={handlePull}
             disabled={remaining > 0}
-            style={({ pressed }) => [styles.pullButtonWrap, pressed && !remaining && styles.pullButtonPressed]}
+            style={({ pressed }) => [
+              styles.pullButtonWrap,
+              remaining === 0 && theme.glow(theme.colors.accent, 0.55, 10),
+              pressed && !remaining && styles.pullButtonPressed,
+            ]}
           >
             <LinearGradient
-              colors={remaining > 0 ? ['#3A4166', '#242B47'] : ['#F5C93B', '#C98A1F']}
+              colors={remaining > 0 ? [theme.colors.surfaceAlt, theme.colors.surface] : [theme.colors.accent, '#C98A1F']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.pullButton}
@@ -132,13 +142,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.border,
   },
+  capsuleWrap: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    marginBottom: 20,
+  },
   capsuleGradient: {
     width: 96,
     height: 96,
     borderRadius: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
   },
   emoji: {
     fontSize: 48,

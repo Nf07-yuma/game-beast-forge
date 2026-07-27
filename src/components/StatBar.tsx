@@ -15,7 +15,7 @@ export function StatBar({ label, value, max, color = theme.colors.primary }: Pro
     <View style={styles.row}>
       <Text style={styles.label}>{label}</Text>
       <View style={styles.track}>
-        <View style={[styles.fill, { width: `${ratio * 100}%`, backgroundColor: color }]} />
+        <View style={[styles.fill, theme.glow(color, 0.6, 8), { width: `${ratio * 100}%`, backgroundColor: color }]} />
       </View>
       <Text style={styles.value}>{value}</Text>
     </View>
@@ -39,7 +39,6 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 6,
     backgroundColor: theme.colors.surfaceAlt,
-    overflow: 'hidden',
     marginHorizontal: 8,
   },
   fill: {
