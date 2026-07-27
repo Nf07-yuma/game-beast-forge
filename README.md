@@ -100,7 +100,9 @@ EXPO_PUBLIC_FIREBASE_APP_ID=...
 
 `npm start` を再起動すると設定タブに「クラウド同期」の操作画面が表示されます。「同期コードを発行する」でこの端末のデータをアップロードし、他の端末で同じコードを入力すると、そのデータを引き継げます（後から発行・上書きした方が勝つシンプルな「最終書き込み優先」方式で、複数端末を同時に操作した場合の自動マージは行いません）。
 
-EAS Buildで配布する場合は、`eas build` 実行時にも同じ環境変数が必要です（[EAS環境変数](https://docs.expo.dev/eas/environment-variables/)としてEASプロジェクトに登録してください）。CIの `build-apk` ジョブはこれらの変数を設定していないため、クラウド同期は無効な状態でビルドされます（それ以外の機能はすべて動作します）。
+EAS Buildで配布する場合は、`eas build` 実行時にも同じ環境変数が必要です（[EAS環境変数](https://docs.expo.dev/eas/environment-variables/)としてEASプロジェクトに登録してください）。
+
+CIの `build-apk` ジョブでクラウド同期を有効にしてビルドしたい場合は、GitHubリポジトリの `Settings → Secrets and variables → Actions` で上記6つの環境変数と同名のシークレットを登録してください。登録すると `.github/workflows/ci.yml` の `build-apk` ジョブがそれらを読み込み、`beast-forge-apk` アーティファクトにクラウド同期が組み込まれた状態でビルドされます。未登録の場合はこれまで通りクラウド同期が無効な状態でビルドされます（それ以外の機能はすべて動作します）。
 
 ## 技術構成
 
