@@ -37,6 +37,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="gacha"
+        options={{
+          title: 'ガチャ',
+          tabBarIcon: ({ focused }) => <TabIcon emoji="🎁" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
         name="breeding"
         options={{
           title: '交配',

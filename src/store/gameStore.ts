@@ -26,6 +26,7 @@ import {
   canBattle,
   simulateBattle,
 } from '@/game/battle';
+import { GACHA_COOLDOWN_MS, rollGachaSpecies } from '@/game/gacha';
 
 function genId(prefix: string): string {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -73,6 +74,7 @@ interface GameState {
   syncCode: string | null;
   syncKey: string | null;
   lastSyncedAt: number | null;
+  lastGachaAt: number | null;
   chooseStarter: (speciesId: string, gender: Gender) => void;
   renameMonster: (id: string, nickname: string) => void;
   feedMonster: (id: string) => ActionResult;
@@ -80,6 +82,7 @@ interface GameState {
   breedMonsters: (idA: string, idB: string) => ActionResult;
   hatchEgg: (id: string) => ActionResult;
   battleMonsters: (idA: string, idB: string) => ActionResult;
+  pullGacha: () => ActionResult;
   setSyncCode: (code: string, key: string) => void;
   applyCloudData: (
     data: { monsters: Record<string, Monster>; eggs: Record<string, Egg>; hasStarter: boolean },
@@ -97,6 +100,7 @@ export const useGameStore = create<GameState>()(
       syncCode: null,
       syncKey: null,
       lastSyncedAt: null,
+      lastGachaAt: null,
 
       chooseStarter: (speciesId, gender) => {
         if (get().hasStarter) return;
@@ -276,6 +280,33 @@ export const useGameStore = create<GameState>()(
           },
         }));
         return { ok: true, message: `${winner.nickname}の勝利！`, monsterId: winner.id };
+      },
+
+      pullGacha: () => {
+        const now = Date.now();
+        const { lastGachaAt } = get();
+        if (lastGachaAt && now - lastGachaAt < GACHA_COOLDOWN_MS) {
+          return { ok: false, message: 'まだガチャを引けません。しばらく待ちましょう' };
+        }
+        const { speciesId, rare } = rollGachaSpecies();
+        const egg: Egg = {
+          id: genId('egg'),
+          speciesId,
+          gender: randomGender(),
+          ivs: randomIVs(),
+          generation: 1,
+          createdAt: now,
+          hatchAt: now + COOLDOWNS.EGG_HATCH_MS,
+        };
+        set((state) => ({
+          eggs: { ...state.eggs, [egg.id]: egg },
+          lastGachaAt: now,
+        }));
+        return {
+          ok: true,
+          message: rare ? '✨希少なタマゴが出た！✨' : 'タマゴを手に入れた！',
+          eggId: egg.id,
+        };
       },
 
       setSyncCode: (code, key) => {

@@ -13,6 +13,7 @@
 - **クラウド同期（任意）**: 設定タブで「同期コード」とパスワードを発行すると、モンスター・タマゴのデータがクラウドに保存され、別の端末で同じコードとパスワードを入力すれば引き継げる（Firebaseプロジェクトの設定が必要。詳しくは下記）
 - コレクションタブでこれまでに育てたモンスター・タマゴを一覧で確認
 - **図鑑**: 一度でも入手した種族が図鑑タブに記録される。未発見の種族は「？？？」のシルエット表示になり、発見済みの種族はタップすると説明・種族値を確認できる
+- **ガチャ**: 1時間に1回、タマゴが1つ手に入る抽選を引ける。基本5属性は出やすく、ハイブリッド種（本来は交配でのみ入手可能）は低確率で出る
 
 ## セットアップ
 
@@ -30,7 +31,7 @@ npm run typecheck   # 型チェック
 npm test             # ユニットテスト（Jest）
 ```
 
-`src/game/logic.ts`（育成・交配のロジック）、`src/game/battle.ts`（バトルロジック）、`src/data/species.ts`（種族データ）、`src/store/gameStore.ts`（ゲーム状態のストア）、`src/notifications/index.ts`（通知スケジューリング。`expo-notifications` をモック）、`src/cloud/sync.ts`（同期コードの発行・アップロード・ダウンロード。`firebase/auth`・`firebase/firestore` をモック）に対するユニットテストが `src/**/*.test.ts` にあります。プッシュ・プルリクエスト時には `.github/workflows/ci.yml` により型チェック・テスト・Androidバンドルのビルド確認・APKのビルドが自動実行されます。
+`src/game/logic.ts`（育成・交配のロジック）、`src/game/battle.ts`（バトルロジック）、`src/game/gacha.ts`（ガチャの抽選ロジック）、`src/data/species.ts`（種族データ）、`src/store/gameStore.ts`（ゲーム状態のストア）、`src/notifications/index.ts`（通知スケジューリング。`expo-notifications` をモック）、`src/cloud/sync.ts`（同期コードの発行・アップロード・ダウンロード。`firebase/auth`・`firebase/firestore` をモック）に対するユニットテストが `src/**/*.test.ts` にあります。プッシュ・プルリクエスト時には `.github/workflows/ci.yml` により型チェック・テスト・Androidバンドルのビルド確認・APKのビルドが自動実行されます。
 
 CIの `build-apk` ジョブは `expo prebuild` でネイティブAndroidプロジェクトを生成し、`./gradlew assembleRelease` で実際に `.apk` をビルドします。成功すると `beast-forge-apk` という名前でワークフロー実行のArtifactsからダウンロードできます（GitHubの Actions タブ → 該当のワークフロー実行 → Artifacts）。JSバンドルがAPKに埋め込まれているため、Metro（開発サーバー）を起動していなくても実機単体でインストール・起動できます。ただし署名は開発用の自動生成キーのため、そのままではPlayストアには提出できません（提出用の正式なリリースビルドは下記の方法をお使いください）。
 
@@ -119,6 +120,7 @@ CIの `build-apk` ジョブでクラウド同期を有効にしてビルドし�
 app/                  画面（expo-router）
   (tabs)/index.tsx     コレクション画面（所持モンスター・タマゴの一覧）
   (tabs)/dex.tsx       図鑑画面（発見済み種族の一覧）
+  (tabs)/gacha.tsx     ガチャ画面
   (tabs)/breeding.tsx  交配画面
   (tabs)/battle.tsx    バトル画面（対戦相手選択）
   (tabs)/settings.tsx  設定画面（クラウド同期）
@@ -131,6 +133,7 @@ src/
   data/species.ts       モンスターの種族データ
   game/logic.ts          育成・交配のゲームロジック
   game/battle.ts          バトルのシミュレーションロジック
+  game/gacha.ts           ガチャの抽選ロジック（重み付き種族プール）
   store/gameStore.ts      Zustandストア（永続化含む）
   notifications/index.ts   ローカル通知（エサ・トレーニング・孵化リマインダー）
   cloud/firebase.ts        Firebase初期化（未設定なら常にnullを返す）
@@ -144,5 +147,4 @@ firestore.rules         Firestoreセキュリティルール（Firebase console�
 ## 今後の拡張候補
 
 - 進化システム（レベルアップなどの条件でモンスターが別の姿・種族へ進化する）
-- ガチャ機能（抽選で新しいモンスターやアイテムを入手する要素）
 - ダンジョンシステム（探索してアイテムや素材を入手するステージ）
