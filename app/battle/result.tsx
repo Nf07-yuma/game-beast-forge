@@ -7,6 +7,7 @@ import { BATTLE_LOSE_AFFECTION, BATTLE_LOSE_EXP, BATTLE_WIN_AFFECTION, BATTLE_WI
 import { MonsterAvatar } from '@/components/MonsterAvatar';
 import { ProgressBar } from '@/components/ProgressBar';
 import { PrimaryButton } from '@/components/PrimaryButton';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { theme } from '@/theme';
 
 export default function BattleResultScreen() {
@@ -17,6 +18,7 @@ export default function BattleResultScreen() {
   if (!battle) {
     return (
       <View style={styles.container}>
+        <AnimatedBackground />
         <Text style={styles.notFound}>バトル結果が見つかりませんでした</Text>
       </View>
     );
@@ -28,6 +30,7 @@ export default function BattleResultScreen() {
   if (!fighterA || !fighterB) {
     return (
       <View style={styles.container}>
+        <AnimatedBackground />
         <Text style={styles.notFound}>バトル結果が見つかりませんでした</Text>
       </View>
     );
@@ -44,7 +47,9 @@ export default function BattleResultScreen() {
   const loser = monsters[battle.loserId];
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <View style={styles.container}>
+      <AnimatedBackground />
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
       <Text style={styles.resultBanner}>🏆 {winner.nickname} の勝利！</Text>
 
       <View style={styles.vsRow}>
@@ -106,7 +111,8 @@ export default function BattleResultScreen() {
         onPress={() => router.replace('/')}
         style={styles.backButton}
       />
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -114,6 +120,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  scroll: {
+    flex: 1,
   },
   scrollContent: {
     padding: 20,

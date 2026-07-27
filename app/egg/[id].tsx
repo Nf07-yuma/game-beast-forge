@@ -8,6 +8,7 @@ import { cancelHatchReminder } from '@/notifications';
 import { useNow, formatDuration } from '@/hooks/useNow';
 import { ProgressBar } from '@/components/ProgressBar';
 import { PrimaryButton } from '@/components/PrimaryButton';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { theme } from '@/theme';
 
 export default function EggDetailScreen() {
@@ -21,6 +22,7 @@ export default function EggDetailScreen() {
   if (!egg) {
     return (
       <View style={styles.container}>
+        <AnimatedBackground />
         <Text style={styles.notFound}>タマゴが見つかりませんでした</Text>
       </View>
     );
@@ -57,6 +59,7 @@ export default function EggDetailScreen() {
 
   return (
     <View style={styles.container}>
+      <AnimatedBackground />
       <Text style={styles.emoji}>🥚</Text>
       <Text style={styles.title}>{ready ? 'タマゴが孵化できます！' : 'タマゴを温めている…'}</Text>
       <ProgressBar ratio={ratio} height={12} color={ready ? theme.colors.success : theme.colors.accent} />

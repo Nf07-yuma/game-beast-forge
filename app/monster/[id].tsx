@@ -14,6 +14,7 @@ import { MonsterAvatar } from '@/components/MonsterAvatar';
 import { ProgressBar } from '@/components/ProgressBar';
 import { StatBar } from '@/components/StatBar';
 import { PrimaryButton } from '@/components/PrimaryButton';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { theme, ELEMENT_LABELS, GENDER_LABELS, GENDER_SYMBOLS } from '@/theme';
 
 const STAT_DISPLAY_MAX = 60;
@@ -34,6 +35,7 @@ export default function MonsterDetailScreen() {
   if (!monster) {
     return (
       <View style={styles.container}>
+        <AnimatedBackground />
         <Text style={styles.notFound}>モンスターが見つかりませんでした</Text>
       </View>
     );
@@ -97,7 +99,9 @@ export default function MonsterDetailScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <View style={styles.container}>
+      <AnimatedBackground />
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
       <View style={styles.header}>
         <MonsterAvatar species={species} size={96} />
         {editingName ? (
@@ -219,7 +223,8 @@ export default function MonsterDetailScreen() {
       {exploreRemaining > 0 ? (
         <Text style={styles.cooldownNote}>探索クールダウン中: あと {formatDuration(exploreRemaining)}</Text>
       ) : null}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -227,6 +232,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  scroll: {
+    flex: 1,
   },
   scrollContent: {
     padding: 20,

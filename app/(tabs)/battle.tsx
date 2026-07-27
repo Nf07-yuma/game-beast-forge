@@ -8,6 +8,7 @@ import { useNow } from '@/hooks/useNow';
 import { MonsterCard } from '@/components/MonsterCard';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { MonsterAvatar } from '@/components/MonsterAvatar';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { theme } from '@/theme';
 
 export default function BattleScreen() {
@@ -46,6 +47,7 @@ export default function BattleScreen() {
 
   return (
     <View style={styles.container}>
+      <AnimatedBackground />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>2匹選んでバトルしよう</Text>
         <Text style={styles.subtitle}>クールダウン中でないモンスター同士で対戦できます</Text>

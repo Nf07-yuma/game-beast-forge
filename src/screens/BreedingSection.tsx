@@ -164,7 +164,6 @@ export function BreedingSection() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   scrollContent: {
     padding: 16,

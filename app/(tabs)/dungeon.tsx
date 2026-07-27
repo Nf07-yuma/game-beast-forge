@@ -7,6 +7,7 @@ import { canExplore } from '@/game/dungeon';
 import { useNow } from '@/hooks/useNow';
 import { MonsterCard } from '@/components/MonsterCard';
 import { PrimaryButton } from '@/components/PrimaryButton';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { theme } from '@/theme';
 
 export default function DungeonScreen() {
@@ -33,6 +34,7 @@ export default function DungeonScreen() {
 
   return (
     <View style={styles.container}>
+      <AnimatedBackground />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>ダンジョン</Text>
         <Text style={styles.subtitle}>

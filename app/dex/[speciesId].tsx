@@ -5,6 +5,7 @@ import { useGameStore } from '@/store/gameStore';
 import { SPECIES } from '@/data/species';
 import { MonsterAvatar } from '@/components/MonsterAvatar';
 import { StatBar } from '@/components/StatBar';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { theme, ELEMENT_LABELS } from '@/theme';
 
 const STAT_DISPLAY_MAX = 40;
@@ -26,37 +27,41 @@ export default function DexDetailScreen() {
   if (!species || !discovered) {
     return (
       <View style={styles.container}>
+        <AnimatedBackground />
         <Text style={styles.notFound}>まだ発見していません</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      <View style={styles.header}>
-        <MonsterAvatar species={species} size={96} />
-        <Text style={styles.name}>{species.name}</Text>
-        <View style={[styles.elementBadge, { backgroundColor: species.color + '33' }]}>
-          <Text style={[styles.elementText, { color: species.color }]}>
-            {ELEMENT_LABELS[species.element]}属性
-          </Text>
+    <View style={styles.container}>
+      <AnimatedBackground />
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <MonsterAvatar species={species} size={96} />
+          <Text style={styles.name}>{species.name}</Text>
+          <View style={[styles.elementBadge, { backgroundColor: species.color + '33' }]}>
+            <Text style={[styles.elementText, { color: species.color }]}>
+              {ELEMENT_LABELS[species.element]}属性
+            </Text>
+          </View>
+          <Text style={styles.ownedCount}>現在{ownedCount}匹所持中</Text>
         </View>
-        <Text style={styles.ownedCount}>現在{ownedCount}匹所持中</Text>
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>説明</Text>
-        <Text style={styles.description}>{species.description}</Text>
-      </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>説明</Text>
+          <Text style={styles.description}>{species.description}</Text>
+        </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>種族値</Text>
-        <StatBar label="HP" value={species.baseStats.hp} max={STAT_DISPLAY_MAX} color={theme.colors.success} />
-        <StatBar label="ATK" value={species.baseStats.atk} max={STAT_DISPLAY_MAX} color={theme.colors.danger} />
-        <StatBar label="DEF" value={species.baseStats.def} max={STAT_DISPLAY_MAX} color={theme.colors.primary} />
-        <StatBar label="SPD" value={species.baseStats.spd} max={STAT_DISPLAY_MAX} color={theme.colors.accent} />
-      </View>
-    </ScrollView>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>種族値</Text>
+          <StatBar label="HP" value={species.baseStats.hp} max={STAT_DISPLAY_MAX} color={theme.colors.success} />
+          <StatBar label="ATK" value={species.baseStats.atk} max={STAT_DISPLAY_MAX} color={theme.colors.danger} />
+          <StatBar label="DEF" value={species.baseStats.def} max={STAT_DISPLAY_MAX} color={theme.colors.primary} />
+          <StatBar label="SPD" value={species.baseStats.spd} max={STAT_DISPLAY_MAX} color={theme.colors.accent} />
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -64,6 +69,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  scroll: {
+    flex: 1,
   },
   scrollContent: {
     padding: 20,

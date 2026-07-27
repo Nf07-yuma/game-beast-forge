@@ -7,6 +7,7 @@ import { COOLDOWNS } from '@/game/logic';
 import { scheduleHatchReminder } from '@/notifications';
 import { useNow, formatDuration } from '@/hooks/useNow';
 import { GachaReveal } from '@/components/GachaReveal';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { theme } from '@/theme';
 
 const totalWeight = GACHA_POOL.reduce((sum, entry) => sum + entry.weight, 0);
@@ -51,6 +52,7 @@ export default function GachaScreen() {
 
   return (
     <View style={styles.container}>
+      <AnimatedBackground />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>ガチャ</Text>
         <Text style={styles.subtitle}>

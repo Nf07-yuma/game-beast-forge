@@ -13,6 +13,7 @@ import {
   pushToCloud,
 } from '@/cloud/sync';
 import { PrimaryButton } from '@/components/PrimaryButton';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { theme } from '@/theme';
 
 function formatElapsed(ms: number): string {
@@ -104,6 +105,7 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
+      <AnimatedBackground />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>クラウド同期</Text>
 
