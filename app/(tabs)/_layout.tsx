@@ -30,6 +30,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="dex"
+        options={{
+          title: '図鑑',
+          tabBarIcon: ({ focused }) => <TabIcon emoji="📚" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
         name="breeding"
         options={{
           title: '交配',
