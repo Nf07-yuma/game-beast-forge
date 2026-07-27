@@ -107,6 +107,7 @@ const styles = StyleSheet.create({
   },
   level: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
     fontWeight: '600',
   },

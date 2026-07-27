@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, Alert } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useGameStore } from '@/store/gameStore';
 import { isFirebaseConfigured } from '@/cloud/firebase';
@@ -13,7 +13,36 @@ import {
   pushToCloud,
 } from '@/cloud/sync';
 import { PrimaryButton } from '@/components/PrimaryButton';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { theme } from '@/theme';
+import { BackgroundStyle } from '@/types';
+
+const BACKGROUND_OPTIONS: { key: BackgroundStyle; label: string; description: string; colors: string[] }[] = [
+  {
+    key: 'orbs',
+    label: 'ドリフティング・オーブ',
+    description: '光の塊がゆっくり漂う、静かな演出',
+    colors: [theme.colors.primary, theme.colors.neonCyan, theme.colors.neonPink],
+  },
+  {
+    key: 'circuit',
+    label: 'サーキット・パルス',
+    description: '配線を光が走る、硬派な演出',
+    colors: [theme.colors.neonCyan, theme.colors.border, theme.colors.neonPink],
+  },
+  {
+    key: 'aurora',
+    label: 'オーロラ・リボン',
+    description: '色の帯がうねる、幻想的な演出',
+    colors: [theme.colors.primary, theme.colors.neonCyan, theme.colors.neonPink],
+  },
+  {
+    key: 'ember',
+    label: 'エンバー・ドリフト',
+    description: '光の粒が立ち上る、生き物っぽい演出',
+    colors: [theme.colors.accent, theme.colors.neonPink, theme.colors.neonCyan],
+  },
+];
 
 function formatElapsed(ms: number): string {
   const totalSeconds = Math.floor(ms / 1000);
@@ -31,6 +60,8 @@ export default function SettingsScreen() {
   const lastSyncedAt = useGameStore((s) => s.lastSyncedAt);
   const setSyncCode = useGameStore((s) => s.setSyncCode);
   const applyCloudData = useGameStore((s) => s.applyCloudData);
+  const backgroundStyle = useGameStore((s) => s.backgroundStyle);
+  const setBackgroundStyle = useGameStore((s) => s.setBackgroundStyle);
   const [syncing, setSyncing] = useState(false);
   const [codeInput, setCodeInput] = useState('');
   const [createPassword, setCreatePassword] = useState('');
@@ -104,8 +135,35 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
+      <AnimatedBackground />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>クラウド同期</Text>
+        <Text style={styles.title}>設定</Text>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>背景スタイル</Text>
+          <View style={styles.bgGrid}>
+            {BACKGROUND_OPTIONS.map((opt) => {
+              const active = backgroundStyle === opt.key;
+              return (
+                <Pressable
+                  key={opt.key}
+                  style={[styles.bgOption, active && [styles.bgOptionActive, theme.glow(theme.colors.primary, 0.4, 8)]]}
+                  onPress={() => setBackgroundStyle(opt.key)}
+                >
+                  <View style={styles.bgSwatch}>
+                    {opt.colors.map((c, i) => (
+                      <View key={i} style={[styles.bgDot, { backgroundColor: c }]} />
+                    ))}
+                  </View>
+                  <Text style={[styles.bgLabel, active && styles.bgLabelActive]}>{opt.label}</Text>
+                  <Text style={styles.bgDesc}>{opt.description}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+
+        <Text style={styles.groupTitle}>クラウド同期</Text>
 
         {!isFirebaseConfigured ? (
           <View style={styles.section}>
@@ -226,13 +284,63 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 10,
   },
+  groupTitle: {
+    color: theme.colors.text,
+    fontSize: 16,
+    fontWeight: '800',
+    marginBottom: 12,
+  },
+  bgGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  bgOption: {
+    flexGrow: 1,
+    flexBasis: '46%',
+    backgroundColor: theme.colors.surfaceAlt,
+    borderRadius: theme.radius.md,
+    borderWidth: 1.5,
+    borderColor: theme.colors.border,
+    padding: 12,
+  },
+  bgOptionActive: {
+    borderColor: theme.colors.primary,
+  },
+  bgSwatch: {
+    flexDirection: 'row',
+    gap: 6,
+    marginBottom: 10,
+  },
+  bgDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+  },
+  bgLabel: {
+    color: theme.colors.text,
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  bgLabelActive: {
+    color: theme.colors.primary,
+  },
+  bgDesc: {
+    color: theme.colors.textMuted,
+    ...theme.textShadow(),
+    fontSize: 11,
+    lineHeight: 15,
+  },
   notConfigured: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
     lineHeight: 19,
   },
   helpText: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
     lineHeight: 18,
     marginBottom: 12,
@@ -247,6 +355,7 @@ const styles = StyleSheet.create({
   },
   syncedAt: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 11,
     textAlign: 'center',
     marginTop: 10,

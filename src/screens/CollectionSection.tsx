@@ -41,7 +41,6 @@ export function CollectionSection() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   scrollContent: {
     padding: 16,
@@ -49,6 +48,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
     fontWeight: '700',
     marginBottom: 10,

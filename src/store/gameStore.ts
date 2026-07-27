@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Monster, Egg, Gender } from '@/types';
+import { Monster, Egg, Gender, BackgroundStyle } from '@/types';
 import { EVOLUTION_TABLE, getSpecies } from '@/data/species';
 import { getDungeon } from '@/data/dungeons';
 import { getItem } from '@/data/items';
@@ -82,6 +82,8 @@ interface GameState {
   syncKey: string | null;
   lastSyncedAt: number | null;
   lastGachaAt: number | null;
+  backgroundStyle: BackgroundStyle;
+  setBackgroundStyle: (style: BackgroundStyle) => void;
   chooseStarter: (speciesId: string, gender: Gender) => void;
   renameMonster: (id: string, nickname: string) => void;
   feedMonster: (id: string) => ActionResult;
@@ -116,6 +118,11 @@ export const useGameStore = create<GameState>()(
       syncKey: null,
       lastSyncedAt: null,
       lastGachaAt: null,
+      backgroundStyle: 'orbs',
+
+      setBackgroundStyle: (style) => {
+        set({ backgroundStyle: style });
+      },
 
       chooseStarter: (speciesId, gender) => {
         if (get().hasStarter) return;

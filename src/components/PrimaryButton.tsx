@@ -69,5 +69,6 @@ const styles = StyleSheet.create({
   },
   labelDisabled: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
   },
 });

@@ -2,6 +2,8 @@ export type ElementType = 'fire' | 'water' | 'grass' | 'electric' | 'rock' | 'my
 
 export type Gender = 'male' | 'female';
 
+export type BackgroundStyle = 'orbs' | 'circuit' | 'aurora' | 'ember';
+
 export interface Stats {
   hp: number;
   atk: number;

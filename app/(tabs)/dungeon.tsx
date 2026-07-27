@@ -7,6 +7,7 @@ import { canExplore } from '@/game/dungeon';
 import { useNow } from '@/hooks/useNow';
 import { MonsterCard } from '@/components/MonsterCard';
 import { PrimaryButton } from '@/components/PrimaryButton';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { theme } from '@/theme';
 
 export default function DungeonScreen() {
@@ -33,6 +34,7 @@ export default function DungeonScreen() {
 
   return (
     <View style={styles.container}>
+      <AnimatedBackground />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>ダンジョン</Text>
         <Text style={styles.subtitle}>
@@ -108,12 +110,14 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
     lineHeight: 18,
     marginBottom: 16,
   },
   sectionTitle: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
     fontWeight: '700',
     marginBottom: 10,
@@ -122,6 +126,7 @@ const styles = StyleSheet.create({
   },
   empty: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
   },
   dungeonCard: {
@@ -151,6 +156,7 @@ const styles = StyleSheet.create({
   },
   dungeonDesc: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
     lineHeight: 17,
     marginBottom: 4,

@@ -6,6 +6,7 @@ import { MonsterAvatar } from '@/components/MonsterAvatar';
 import { CollectionSection } from '@/screens/CollectionSection';
 import { BreedingSection } from '@/screens/BreedingSection';
 import { DexSection } from '@/screens/DexSection';
+import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { theme } from '@/theme';
 
 function StarterPicker() {
@@ -59,6 +60,7 @@ export default function MonsterScreen() {
   if (!hasStarter) {
     return (
       <View style={styles.container}>
+        <AnimatedBackground />
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <StarterPicker />
         </ScrollView>
@@ -68,6 +70,7 @@ export default function MonsterScreen() {
 
   return (
     <View style={styles.container}>
+      <AnimatedBackground />
       <View style={styles.switcher}>
         {SECTIONS.map((s) => (
           <Pressable
@@ -121,6 +124,7 @@ const styles = StyleSheet.create({
   },
   switchLabel: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
     fontWeight: '700',
   },
@@ -138,6 +142,7 @@ const styles = StyleSheet.create({
   },
   starterSubtitle: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 13,
     marginBottom: 20,
   },
@@ -163,6 +168,7 @@ const styles = StyleSheet.create({
   },
   starterDesc: {
     color: theme.colors.textMuted,
+    ...theme.textShadow(),
     fontSize: 12,
     lineHeight: 17,
   },
