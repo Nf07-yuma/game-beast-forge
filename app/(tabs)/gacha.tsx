@@ -58,7 +58,13 @@ export default function GachaScreen() {
         </Text>
 
         <View style={styles.card}>
-          <Animated.View style={[{ transform: [{ scale: pulseScale }] }, theme.glow(theme.colors.primary, 0.6, 16)]}>
+          <Animated.View
+            style={[
+              styles.capsuleWrap,
+              theme.glow(theme.colors.primary, 0.6, 16),
+              { transform: [{ scale: pulseScale }] },
+            ]}
+          >
             <LinearGradient
               colors={[theme.colors.primary, theme.colors.primaryMuted]}
               style={styles.capsuleGradient}
@@ -136,13 +142,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.border,
   },
+  capsuleWrap: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    marginBottom: 20,
+  },
   capsuleGradient: {
     width: 96,
     height: 96,
     borderRadius: 48,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
   },
   emoji: {
     fontSize: 48,
