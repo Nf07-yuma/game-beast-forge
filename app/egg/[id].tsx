@@ -31,8 +31,8 @@ export default function EggDetailScreen() {
   const ratio = elapsed / total;
   const remaining = egg.hatchAt - now;
   const ready = remaining <= 0;
-  const parentA = monsters[egg.parentIds[0]];
-  const parentB = monsters[egg.parentIds[1]];
+  const parentA = egg.parentIds ? monsters[egg.parentIds[0]] : undefined;
+  const parentB = egg.parentIds ? monsters[egg.parentIds[1]] : undefined;
 
   function handleHatch() {
     const result = hatchEgg(egg.id);

@@ -1,6 +1,8 @@
 import { useGameStore } from './gameStore';
 import { COOLDOWNS, MIN_BREED_LEVEL } from '@/game/logic';
 import { BATTLE_COOLDOWN_MS } from '@/game/battle';
+import { GACHA_COOLDOWN_MS } from '@/game/gacha';
+import { SPECIES } from '@/data/species';
 import { Monster } from '@/types';
 
 function makeMonster(overrides: Partial<Monster> = {}): Monster {
@@ -24,7 +26,13 @@ function makeMonster(overrides: Partial<Monster> = {}): Monster {
 }
 
 beforeEach(() => {
-  useGameStore.setState({ monsters: {}, eggs: {}, hasStarter: false, lastBattle: null });
+  useGameStore.setState({
+    monsters: {},
+    eggs: {},
+    hasStarter: false,
+    lastBattle: null,
+    lastGachaAt: null,
+  });
   jest.useFakeTimers({ advanceTimers: false });
   jest.setSystemTime(new Date('2026-01-01T00:00:00Z'));
 });
@@ -254,5 +262,34 @@ describe('battleMonsters', () => {
     useGameStore.getState().battleMonsters('m1', 'm2');
     jest.setSystemTime(new Date(Date.now() + BATTLE_COOLDOWN_MS + 1));
     expect(useGameStore.getState().battleMonsters('m1', 'm2').ok).toBe(true);
+  });
+});
+
+describe('pullGacha', () => {
+  it('creates a parentless egg from the species pool and sets the cooldown', () => {
+    const result = useGameStore.getState().pullGacha();
+    expect(result.ok).toBe(true);
+    expect(result.eggId).toBeTruthy();
+
+    const state = useGameStore.getState();
+    const egg = state.eggs[result.eggId as string];
+    expect(egg).toBeDefined();
+    expect(SPECIES[egg.speciesId]).toBeDefined();
+    expect(egg.parentIds).toBeUndefined();
+    expect(state.lastGachaAt).not.toBeNull();
+  });
+
+  it('enforces a cooldown between pulls', () => {
+    useGameStore.getState().pullGacha();
+    const second = useGameStore.getState().pullGacha();
+    expect(second.ok).toBe(false);
+    expect(Object.keys(useGameStore.getState().eggs)).toHaveLength(1);
+  });
+
+  it('allows pulling again once the cooldown has elapsed', () => {
+    useGameStore.getState().pullGacha();
+    jest.setSystemTime(new Date(Date.now() + GACHA_COOLDOWN_MS + 1));
+    expect(useGameStore.getState().pullGacha().ok).toBe(true);
+    expect(Object.keys(useGameStore.getState().eggs)).toHaveLength(2);
   });
 });

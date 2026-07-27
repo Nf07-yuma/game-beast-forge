@@ -40,7 +40,8 @@ export interface Monster {
 
 export interface Egg {
   id: string;
-  parentIds: [string, string];
+  /** Absent for eggs obtained outside breeding (e.g. gacha). */
+  parentIds?: [string, string];
   speciesId: string;
   gender: Gender;
   ivs: Stats;
