@@ -1,10 +1,12 @@
 import { signInAnonymously } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import * as Crypto from 'expo-crypto';
 import { getFirebaseAuth, getFirebaseDb, isFirebaseConfigured } from './firebase';
 import { Egg, Monster } from '@/types';
 
 const SYNC_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I to avoid confusion
 const SYNC_CODE_LENGTH = 8;
+export const MIN_SYNC_PASSWORD_LENGTH = 4;
 
 export interface CloudPayload {
   monsters: Record<string, Monster>;
@@ -25,6 +27,23 @@ export function normalizeSyncCode(input: string): string {
   return input.trim().toUpperCase().replace(/\s+/g, '');
 }
 
+export function isValidSyncPassword(password: string): boolean {
+  return password.length >= MIN_SYNC_PASSWORD_LENGTH;
+}
+
+/**
+ * Derives the Firestore document key from the sync code and password
+ * together (SHA-256 hex digest), instead of using the code alone as the
+ * document id. The code by itself is short and shareable-looking enough
+ * that someone could stumble onto (or guess) another player's document;
+ * requiring the password too means both have to be known to read or
+ * overwrite a save, which the app never stores anywhere itself.
+ */
+export async function deriveSyncKey(code: string, password: string): Promise<string> {
+  const raw = `${normalizeSyncCode(code)}:${password}`;
+  return Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, raw);
+}
+
 export async function ensureAnonymousAuth(): Promise<boolean> {
   if (!isFirebaseConfigured) return false;
   const auth = getFirebaseAuth();
@@ -39,7 +58,7 @@ export async function ensureAnonymousAuth(): Promise<boolean> {
 }
 
 export async function pushToCloud(
-  syncCode: string,
+  syncKey: string,
   data: Omit<CloudPayload, 'updatedAt'>
 ): Promise<{ ok: boolean; message?: string }> {
   if (!isFirebaseConfigured) {
@@ -54,7 +73,7 @@ export async function pushToCloud(
     return { ok: false, message: 'クラウド同期は設定されていません' };
   }
   try {
-    await setDoc(doc(db, 'players', syncCode), {
+    await setDoc(doc(db, 'players', syncKey), {
       ...data,
       updatedAt: Date.now(),
     });
@@ -65,7 +84,7 @@ export async function pushToCloud(
 }
 
 export async function pullFromCloud(
-  syncCode: string
+  syncKey: string
 ): Promise<{ ok: boolean; data?: CloudPayload; message?: string }> {
   if (!isFirebaseConfigured) {
     return { ok: false, message: 'クラウド同期は設定されていません' };
@@ -79,9 +98,9 @@ export async function pullFromCloud(
     return { ok: false, message: 'クラウド同期は設定されていません' };
   }
   try {
-    const snapshot = await getDoc(doc(db, 'players', syncCode));
+    const snapshot = await getDoc(doc(db, 'players', syncKey));
     if (!snapshot.exists()) {
-      return { ok: false, message: 'そのコードのデータは見つかりませんでした' };
+      return { ok: false, message: 'コードまたはパスワードが違うか、データが見つかりませんでした' };
     }
     return { ok: true, data: snapshot.data() as CloudPayload };
   } catch {

@@ -7,9 +7,9 @@ let started = false;
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 function flushPush() {
-  const { syncCode, monsters, eggs, hasStarter } = useGameStore.getState();
-  if (!syncCode) return;
-  pushToCloud(syncCode, { monsters, eggs, hasStarter }).then((result) => {
+  const { syncKey, monsters, eggs, hasStarter } = useGameStore.getState();
+  if (!syncKey) return;
+  pushToCloud(syncKey, { monsters, eggs, hasStarter }).then((result) => {
     if (result.ok) {
       useGameStore.setState({ lastSyncedAt: Date.now() });
     }
@@ -17,9 +17,9 @@ function flushPush() {
 }
 
 function pullOnLaunchIfNewer() {
-  const { syncCode, lastSyncedAt } = useGameStore.getState();
-  if (!syncCode) return;
-  pullFromCloud(syncCode).then((result) => {
+  const { syncKey, lastSyncedAt } = useGameStore.getState();
+  if (!syncKey) return;
+  pullFromCloud(syncKey).then((result) => {
     if (!result.ok || !result.data) return;
     if (shouldAdoptCloudData(lastSyncedAt, result.data.updatedAt)) {
       useGameStore.getState().applyCloudData(
@@ -55,7 +55,7 @@ export function initCloudSync(): void {
   }
 
   useGameStore.subscribe((state, prevState) => {
-    if (!state.syncCode) return;
+    if (!state.syncKey) return;
     if (
       state.monsters === prevState.monsters &&
       state.eggs === prevState.eggs &&

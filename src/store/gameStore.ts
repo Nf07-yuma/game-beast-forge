@@ -71,6 +71,7 @@ interface GameState {
   hasStarter: boolean;
   lastBattle: BattleResult | null;
   syncCode: string | null;
+  syncKey: string | null;
   lastSyncedAt: number | null;
   chooseStarter: (speciesId: string, gender: Gender) => void;
   renameMonster: (id: string, nickname: string) => void;
@@ -79,7 +80,7 @@ interface GameState {
   breedMonsters: (idA: string, idB: string) => ActionResult;
   hatchEgg: (id: string) => ActionResult;
   battleMonsters: (idA: string, idB: string) => ActionResult;
-  setSyncCode: (code: string) => void;
+  setSyncCode: (code: string, key: string) => void;
   applyCloudData: (
     data: { monsters: Record<string, Monster>; eggs: Record<string, Egg>; hasStarter: boolean },
     updatedAt: number
@@ -94,6 +95,7 @@ export const useGameStore = create<GameState>()(
       hasStarter: false,
       lastBattle: null,
       syncCode: null,
+      syncKey: null,
       lastSyncedAt: null,
 
       chooseStarter: (speciesId, gender) => {
@@ -276,8 +278,8 @@ export const useGameStore = create<GameState>()(
         return { ok: true, message: `${winner.nickname}の勝利！`, monsterId: winner.id };
       },
 
-      setSyncCode: (code) => {
-        set({ syncCode: code });
+      setSyncCode: (code, key) => {
+        set({ syncCode: code, syncKey: key });
       },
 
       applyCloudData: (data, updatedAt) => {

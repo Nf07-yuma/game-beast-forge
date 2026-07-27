@@ -23,8 +23,10 @@ jest.mock('./firebase', () => ({
 }));
 
 import {
+  deriveSyncKey,
   ensureAnonymousAuth,
   generateSyncCode,
+  isValidSyncPassword,
   normalizeSyncCode,
   pullFromCloud,
   pushToCloud,
@@ -44,6 +46,45 @@ describe('generateSyncCode', () => {
 describe('normalizeSyncCode', () => {
   it('trims, uppercases, and strips internal whitespace', () => {
     expect(normalizeSyncCode('  ab3d efgh  ')).toBe('AB3DEFGH');
+  });
+});
+
+describe('isValidSyncPassword', () => {
+  it('rejects passwords shorter than the minimum length', () => {
+    expect(isValidSyncPassword('abc')).toBe(false);
+    expect(isValidSyncPassword('')).toBe(false);
+  });
+
+  it('accepts passwords at or above the minimum length', () => {
+    expect(isValidSyncPassword('abcd')).toBe(true);
+    expect(isValidSyncPassword('a much longer password')).toBe(true);
+  });
+});
+
+describe('deriveSyncKey', () => {
+  it('produces a deterministic hex digest for the same code and password', async () => {
+    const keyA = await deriveSyncKey('AB3DEFGH', 'hunter2');
+    const keyB = await deriveSyncKey('AB3DEFGH', 'hunter2');
+    expect(keyA).toBe(keyB);
+    expect(keyA).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it('normalizes the code before hashing, so casing and whitespace do not matter', async () => {
+    const keyA = await deriveSyncKey('AB3DEFGH', 'hunter2');
+    const keyB = await deriveSyncKey('  ab3d efgh  ', 'hunter2');
+    expect(keyA).toBe(keyB);
+  });
+
+  it('produces a different key for a different password', async () => {
+    const keyA = await deriveSyncKey('AB3DEFGH', 'hunter2');
+    const keyB = await deriveSyncKey('AB3DEFGH', 'differentPassword');
+    expect(keyA).not.toBe(keyB);
+  });
+
+  it('produces a different key for a different code', async () => {
+    const keyA = await deriveSyncKey('AB3DEFGH', 'hunter2');
+    const keyB = await deriveSyncKey('ZZZZZZZZ', 'hunter2');
+    expect(keyA).not.toBe(keyB);
   });
 });
 
@@ -86,7 +127,7 @@ describe('pushToCloud', () => {
     mockAuthInstance.currentUser = { uid: 'abc' };
   });
 
-  it('writes the payload under players/{code} with a fresh updatedAt', async () => {
+  it('writes the payload under players/{key} with a fresh updatedAt', async () => {
     mockSetDoc.mockResolvedValue(undefined);
     const result = await pushToCloud('AB3DEFGH', {
       monsters: {},
