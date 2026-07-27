@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, Alert } from 'react-native';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { useGameStore } from '@/store/gameStore';
-import { getSpecies } from '@/data/species';
+import { EVOLUTION_TABLE, getSpecies } from '@/data/species';
+import { getItem } from '@/data/items';
 import { computeStats, expForLevel, COOLDOWNS } from '@/game/logic';
 import { BATTLE_COOLDOWN_MS } from '@/game/battle';
+import { EXPLORE_COOLDOWN_MS } from '@/game/dungeon';
+import { canEvolve } from '@/game/evolution';
 import { scheduleFeedReminder, scheduleTrainReminder } from '@/notifications';
 import { useNow, formatDuration } from '@/hooks/useNow';
 import { MonsterAvatar } from '@/components/MonsterAvatar';
@@ -20,9 +23,11 @@ export default function MonsterDetailScreen() {
   const navigation = useNavigation();
   const now = useNow();
   const monster = useGameStore((s) => s.monsters[id]);
+  const items = useGameStore((s) => s.items);
   const feedMonster = useGameStore((s) => s.feedMonster);
   const trainMonster = useGameStore((s) => s.trainMonster);
   const renameMonster = useGameStore((s) => s.renameMonster);
+  const evolveMonster = useGameStore((s) => s.evolveMonster);
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState(monster?.nickname ?? '');
 
@@ -37,6 +42,8 @@ export default function MonsterDetailScreen() {
   const species = getSpecies(monster.speciesId);
   const stats = computeStats(species, monster.level, monster.ivs);
   const expNeeded = expForLevel(monster.level);
+  const evolution = EVOLUTION_TABLE[monster.speciesId];
+  const evolutionCheck = evolution ? canEvolve(monster, items) : null;
 
   const feedRemaining = monster.lastFedAt
     ? monster.lastFedAt + COOLDOWNS.FEED_MS - now
@@ -49,6 +56,9 @@ export default function MonsterDetailScreen() {
     : 0;
   const battleRemaining = monster.lastBattledAt
     ? monster.lastBattledAt + BATTLE_COOLDOWN_MS - now
+    : 0;
+  const exploreRemaining = monster.lastExploredAt
+    ? monster.lastExploredAt + EXPLORE_COOLDOWN_MS - now
     : 0;
 
   function handleFeed() {
@@ -67,6 +77,15 @@ export default function MonsterDetailScreen() {
       return;
     }
     scheduleTrainReminder(monster.id, monster.nickname, COOLDOWNS.TRAIN_MS).catch(() => {});
+  }
+
+  function handleEvolve() {
+    const result = evolveMonster(monster.id);
+    if (!result.ok) {
+      Alert.alert('進化できません', result.message);
+      return;
+    }
+    Alert.alert('進化した！', result.message);
   }
 
   function saveName() {
@@ -152,6 +171,27 @@ export default function MonsterDetailScreen() {
         <StatBar label="SPD" value={stats.spd} max={STAT_DISPLAY_MAX} color={theme.colors.accent} />
       </View>
 
+      {evolution ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>進化</Text>
+          <View style={styles.evolutionRow}>
+            <MonsterAvatar species={getSpecies(evolution.targetId)} size={56} />
+            <View style={styles.evolutionInfo}>
+              <Text style={styles.evolutionTarget}>{getSpecies(evolution.targetId).name}に進化</Text>
+              <Text style={styles.evolutionReq}>
+                Lv.{evolution.minLevel}以上・{getItem(evolution.itemId).emoji}
+                {getItem(evolution.itemId).name} ×{evolution.itemCount}（所持:{' '}
+                {items[evolution.itemId] ?? 0}個）
+              </Text>
+            </View>
+          </View>
+          <PrimaryButton label="✨ 進化させる" onPress={handleEvolve} disabled={!evolutionCheck?.ok} />
+          {evolutionCheck && !evolutionCheck.ok ? (
+            <Text style={styles.evolutionWarning}>{evolutionCheck.reason}</Text>
+          ) : null}
+        </View>
+      ) : null}
+
       <View style={styles.actions}>
         <PrimaryButton
           label="🍖 エサをあげる"
@@ -175,6 +215,9 @@ export default function MonsterDetailScreen() {
       ) : null}
       {battleRemaining > 0 ? (
         <Text style={styles.cooldownNote}>バトルクールダウン中: あと {formatDuration(battleRemaining)}</Text>
+      ) : null}
+      {exploreRemaining > 0 ? (
+        <Text style={styles.cooldownNote}>探索クールダウン中: あと {formatDuration(exploreRemaining)}</Text>
       ) : null}
     </ScrollView>
   );
@@ -264,6 +307,32 @@ const styles = StyleSheet.create({
   expText: {
     color: theme.colors.textMuted,
     fontSize: 12,
+  },
+  evolutionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  evolutionInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  evolutionTarget: {
+    color: theme.colors.text,
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  evolutionReq: {
+    color: theme.colors.textMuted,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  evolutionWarning: {
+    color: theme.colors.danger,
+    fontSize: 11,
+    textAlign: 'center',
+    marginTop: 8,
   },
   actions: {
     flexDirection: 'row',

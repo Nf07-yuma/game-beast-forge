@@ -2,7 +2,9 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Monster, Egg, Gender } from '@/types';
-import { getSpecies } from '@/data/species';
+import { EVOLUTION_TABLE, getSpecies } from '@/data/species';
+import { getDungeon } from '@/data/dungeons';
+import { getItem } from '@/data/items';
 import {
   COOLDOWNS,
   FEED_EXP,
@@ -27,6 +29,8 @@ import {
   simulateBattle,
 } from '@/game/battle';
 import { GACHA_COOLDOWN_MS, rollGachaSpecies } from '@/game/gacha';
+import { EXPLORE_EXP, canExplore, rollItemDrop } from '@/game/dungeon';
+import { canEvolve } from '@/game/evolution';
 
 function genId(prefix: string): string {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -55,6 +59,7 @@ function createMonster(params: {
     lastFedAt: null,
     lastTrainedAt: null,
     lastBattledAt: null,
+    lastExploredAt: null,
     breedingCooldownUntil: null,
   };
 }
@@ -69,6 +74,7 @@ interface ActionResult {
 interface GameState {
   monsters: Record<string, Monster>;
   eggs: Record<string, Egg>;
+  items: Record<string, number>;
   hasStarter: boolean;
   lastBattle: BattleResult | null;
   syncCode: string | null;
@@ -83,9 +89,16 @@ interface GameState {
   hatchEgg: (id: string) => ActionResult;
   battleMonsters: (idA: string, idB: string) => ActionResult;
   pullGacha: () => ActionResult;
+  exploreDungeon: (monsterId: string, dungeonId: string) => ActionResult;
+  evolveMonster: (monsterId: string) => ActionResult;
   setSyncCode: (code: string, key: string) => void;
   applyCloudData: (
-    data: { monsters: Record<string, Monster>; eggs: Record<string, Egg>; hasStarter: boolean },
+    data: {
+      monsters: Record<string, Monster>;
+      eggs: Record<string, Egg>;
+      hasStarter: boolean;
+      items?: Record<string, number>;
+    },
     updatedAt: number
   ) => void;
 }
@@ -95,6 +108,7 @@ export const useGameStore = create<GameState>()(
     (set, get) => ({
       monsters: {},
       eggs: {},
+      items: {},
       hasStarter: false,
       lastBattle: null,
       syncCode: null,
@@ -309,6 +323,61 @@ export const useGameStore = create<GameState>()(
         };
       },
 
+      exploreDungeon: (monsterId, dungeonId) => {
+        const now = Date.now();
+        const monster = get().monsters[monsterId];
+        if (!monster) return { ok: false, message: 'モンスターが見つかりません' };
+        const dungeon = getDungeon(dungeonId);
+        const check = canExplore(monster, now);
+        if (!check.ok) return { ok: false, message: check.reason ?? '探索できません' };
+
+        const { level, exp } = addExp(monster.level, monster.exp, EXPLORE_EXP);
+        const gotItem = rollItemDrop();
+        set((state) => ({
+          monsters: {
+            ...state.monsters,
+            [monsterId]: { ...monster, level, exp, lastExploredAt: now },
+          },
+          items: gotItem
+            ? {
+                ...state.items,
+                [dungeon.dropItemId]: (state.items[dungeon.dropItemId] ?? 0) + 1,
+              }
+            : state.items,
+        }));
+        return {
+          ok: true,
+          message: gotItem
+            ? `${monster.nickname}が探索から戻ってきた！${getItem(dungeon.dropItemId).name}を手に入れた！`
+            : `${monster.nickname}が探索から戻ってきた。今回は何も見つからなかった…`,
+          monsterId,
+        };
+      },
+
+      evolveMonster: (monsterId) => {
+        const monster = get().monsters[monsterId];
+        if (!monster) return { ok: false, message: 'モンスターが見つかりません' };
+        const { items } = get();
+        const check = canEvolve(monster, items);
+        if (!check.ok) return { ok: false, message: check.reason ?? '進化できません' };
+        const req = EVOLUTION_TABLE[monster.speciesId];
+        set((state) => ({
+          monsters: {
+            ...state.monsters,
+            [monsterId]: { ...monster, speciesId: req.targetId },
+          },
+          items: {
+            ...state.items,
+            [req.itemId]: (state.items[req.itemId] ?? 0) - req.itemCount,
+          },
+        }));
+        return {
+          ok: true,
+          message: `${monster.nickname}は${getSpecies(req.targetId).name}に進化した！`,
+          monsterId,
+        };
+      },
+
       setSyncCode: (code, key) => {
         set({ syncCode: code, syncKey: key });
       },
@@ -317,6 +386,7 @@ export const useGameStore = create<GameState>()(
         set({
           monsters: data.monsters,
           eggs: data.eggs,
+          items: data.items ?? {},
           hasStarter: data.hasStarter,
           lastSyncedAt: updatedAt,
         });

@@ -21,7 +21,7 @@ import { pullFromCloud, pushToCloud } from './sync';
 
 describe('sync when Firebase is not configured', () => {
   it('short-circuits push without touching the network', async () => {
-    const result = await pushToCloud('AB3DEFGH', { monsters: {}, eggs: {}, hasStarter: false });
+    const result = await pushToCloud('AB3DEFGH', { monsters: {}, eggs: {}, items: {}, hasStarter: false });
     expect(result.ok).toBe(false);
     expect(mockSetDoc).not.toHaveBeenCalled();
   });

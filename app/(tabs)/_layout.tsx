@@ -51,6 +51,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="dungeon"
+        options={{
+          title: 'ダンジョン',
+          tabBarIcon: ({ focused }) => <TabIcon emoji="🗺️" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
         name="battle"
         options={{
           title: 'バトル',

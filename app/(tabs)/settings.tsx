@@ -41,8 +41,8 @@ export default function SettingsScreen() {
     setSyncing(true);
     const code = generateSyncCode();
     const key = await deriveSyncKey(code, createPassword);
-    const { monsters, eggs, hasStarter } = useGameStore.getState();
-    const result = await pushToCloud(key, { monsters, eggs, hasStarter });
+    const { monsters, eggs, items, hasStarter } = useGameStore.getState();
+    const result = await pushToCloud(key, { monsters, eggs, items, hasStarter });
     setSyncing(false);
     if (!result.ok) {
       Alert.alert('発行できませんでした', result.message ?? '');
@@ -87,6 +87,7 @@ export default function SettingsScreen() {
               {
                 monsters: result.data.monsters,
                 eggs: result.data.eggs,
+                items: result.data.items,
                 hasStarter: result.data.hasStarter,
               },
               result.data.updatedAt

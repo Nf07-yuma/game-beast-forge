@@ -151,6 +151,56 @@ export const SPECIES: Record<string, Species> = {
     growth: { hp: 3.4, atk: 2.2, def: 2.2, spd: 1.4 },
     description: '角に静電気を帯びた希少種。スパーキットとボルダラムの交配でのみ誕生する。',
   },
+  emberwolf: {
+    id: 'emberwolf',
+    name: 'エンバーウルフ',
+    element: 'fire',
+    emoji: '🐺',
+    color: '#E8432A',
+    baseStats: { hp: 34, atk: 14, def: 9, spd: 11 },
+    growth: { hp: 4.2, atk: 3, def: 1.8, spd: 2.2 },
+    description: 'エンバーパップが進化した姿。全身の炎がいっそう激しく燃え盛り、群れを率いる牙を持つ。',
+  },
+  aquashark: {
+    id: 'aquashark',
+    name: 'アクアシャーク',
+    element: 'water',
+    emoji: '🦈',
+    color: '#1F7FBE',
+    baseStats: { hp: 38, atk: 12, def: 11, spd: 9 },
+    growth: { hp: 4.6, atk: 2.4, def: 2.8, spd: 1.8 },
+    description: 'アクアフィンが進化した姿。鋭い歯と強靭な尾びれで荒波を切り裂く。',
+  },
+  leafmoth: {
+    id: 'leafmoth',
+    name: 'リーフモス',
+    element: 'grass',
+    emoji: '🦋',
+    color: '#3E9C46',
+    baseStats: { hp: 38, atk: 9, def: 11, spd: 10 },
+    growth: { hp: 4.4, atk: 2, def: 2.6, spd: 2.2 },
+    description: 'リーフリングが進化した姿。翅に広がる葉脈模様が美しく、夜の森を舞う。',
+  },
+  thunderfox: {
+    id: 'thunderfox',
+    name: 'サンダーフォックス',
+    element: 'electric',
+    emoji: '🦊',
+    color: '#D9A62E',
+    baseStats: { hp: 30, atk: 13, def: 8, spd: 15 },
+    growth: { hp: 3.6, atk: 2.8, def: 1.6, spd: 3.2 },
+    description: 'スパーキットが進化した姿。尻尾から放電しながら音速で駆け抜ける。',
+  },
+  rocktitan: {
+    id: 'rocktitan',
+    name: 'ロックタイタン',
+    element: 'rock',
+    emoji: '🗿',
+    color: '#6E5D48',
+    baseStats: { hp: 44, atk: 12, def: 16, spd: 5 },
+    growth: { hp: 5.2, atk: 2.6, def: 3.6, spd: 1.2 },
+    description: 'ボルダラムが進化した姿。全身が岩の鎧に覆われ、山をも動かす力を持つ。',
+  },
 };
 
 export const STARTER_SPECIES_IDS = ['emberpup', 'aquafin', 'leafling'];
@@ -166,6 +216,21 @@ export const HYBRID_TABLE: Record<string, string> = {
   'water+rock': 'tidecrab',
   'grass+rock': 'mossshell',
   'electric+rock': 'thunderram',
+};
+
+export interface EvolutionRequirement {
+  targetId: string;
+  minLevel: number;
+  itemId: string;
+  itemCount: number;
+}
+
+export const EVOLUTION_TABLE: Record<string, EvolutionRequirement> = {
+  emberpup: { targetId: 'emberwolf', minLevel: 10, itemId: 'fire_stone', itemCount: 3 },
+  aquafin: { targetId: 'aquashark', minLevel: 10, itemId: 'water_stone', itemCount: 3 },
+  leafling: { targetId: 'leafmoth', minLevel: 10, itemId: 'grass_stone', itemCount: 3 },
+  sparkit: { targetId: 'thunderfox', minLevel: 10, itemId: 'electric_stone', itemCount: 3 },
+  boulderam: { targetId: 'rocktitan', minLevel: 10, itemId: 'rock_stone', itemCount: 3 },
 };
 
 export function getSpecies(speciesId: string): Species {
