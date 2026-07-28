@@ -7,6 +7,7 @@ import {
   Pressable,
   Alert,
   Animated,
+  Easing,
   PanResponder,
   Dimensions,
 } from 'react-native';
@@ -86,9 +87,20 @@ export default function MonsterScreen() {
         if (goNext || goPrev) {
           const targetIndex = goNext ? currentIndex + 1 : currentIndex - 1;
           const exitTo = goNext ? -SCREEN_W : SCREEN_W;
+          const enterFrom = goNext ? SCREEN_W : -SCREEN_W;
           Animated.timing(translateX, { toValue: exitTo, duration: 150, useNativeDriver: false }).start(() => {
+            // Relocate to the opposite off-screen edge before swapping content —
+            // both positions are invisible, so this can't flash the old section
+            // back into view the way resetting straight to 0 did. Then slide the
+            // new section in from there instead of popping it in instantly.
+            translateX.setValue(enterFrom);
             setSection(SECTIONS[targetIndex].key);
-            translateX.setValue(0);
+            Animated.timing(translateX, {
+              toValue: 0,
+              duration: 180,
+              easing: Easing.out(Easing.cubic),
+              useNativeDriver: false,
+            }).start();
           });
         } else {
           Animated.spring(translateX, { toValue: 0, useNativeDriver: false, bounciness: 6 }).start();
