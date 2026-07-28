@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, Animated, Dimensions } from 'react-native';
 import { theme } from '@/theme';
+import { useResumingSawtooth } from './useResumingAnimation';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
@@ -40,21 +41,7 @@ function SoftBlob({ size, left, top, color }: { size: number; left: number; top:
 }
 
 function Ember({ ember }: { ember: (typeof EMBERS)[number] }) {
-  const progress = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.timing(progress, {
-        toValue: 1,
-        duration: ember.duration,
-        delay: ember.delay,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [progress, ember.duration, ember.delay]);
+  const progress = useResumingSawtooth(ember.duration, { delay: ember.delay });
 
   const translateY = progress.interpolate({ inputRange: [0, 1], outputRange: [0, -SCREEN_H * 0.75] });
   const opacity = progress.interpolate({

@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, Animated, Dimensions } from 'react-native';
 import { theme } from '@/theme';
+import { useResumingPingPong } from './useResumingAnimation';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
@@ -19,18 +20,7 @@ const BANDS: BandConfig[] = [
 ];
 
 function Band({ band }: { band: BandConfig }) {
-  const progress = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(progress, { toValue: 1, duration: band.duration, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-        Animated.timing(progress, { toValue: 0, duration: band.duration, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-      ])
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [progress, band.duration]);
+  const progress = useResumingPingPong(band.duration);
 
   const rotate = progress.interpolate({ inputRange: [0, 1], outputRange: ['0deg', `${band.swing}deg`] });
   const translateX = progress.interpolate({ inputRange: [0, 1], outputRange: [-SCREEN_W * 0.08, SCREEN_W * 0.08] });

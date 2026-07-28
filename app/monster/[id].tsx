@@ -1,6 +1,17 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Alert } from 'react-native';
-import { useLocalSearchParams, useNavigation } from 'expo-router';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TextInput,
+  Alert,
+  Animated,
+  Easing,
+  PanResponder,
+  Dimensions,
+} from 'react-native';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useGameStore } from '@/store/gameStore';
 import { EVOLUTION_TABLE, getSpecies } from '@/data/species';
 import { getItem } from '@/data/items';
@@ -18,12 +29,16 @@ import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { theme, ELEMENT_LABELS, GENDER_LABELS, GENDER_SYMBOLS } from '@/theme';
 
 const STAT_DISPLAY_MAX = 60;
+const SCREEN_W = Dimensions.get('window').width;
+const SWIPE_THRESHOLD = 80;
 
 export default function MonsterDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const navigation = useNavigation();
+  const router = useRouter();
   const now = useNow();
   const monster = useGameStore((s) => s.monsters[id]);
+  const monsters = useGameStore((s) => s.monsters);
   const items = useGameStore((s) => s.items);
   const feedMonster = useGameStore((s) => s.feedMonster);
   const trainMonster = useGameStore((s) => s.trainMonster);
@@ -31,6 +46,65 @@ export default function MonsterDetailScreen() {
   const evolveMonster = useGameStore((s) => s.evolveMonster);
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState(monster?.nickname ?? '');
+
+  const monsterList = useMemo(
+    () => Object.values(monsters).sort((a, b) => b.createdAt - a.createdAt),
+    [monsters]
+  );
+  const currentIndex = monsterList.findIndex((m) => m.id === id);
+  const prevMonster = currentIndex > 0 ? monsterList[currentIndex - 1] : null;
+  const nextMonster =
+    currentIndex >= 0 && currentIndex < monsterList.length - 1 ? monsterList[currentIndex + 1] : null;
+  const prevIdRef = useRef(prevMonster?.id);
+  const nextIdRef = useRef(nextMonster?.id);
+  prevIdRef.current = prevMonster?.id;
+  nextIdRef.current = nextMonster?.id;
+
+  const translateX = useRef(new Animated.Value(0)).current;
+  const contentOpacity = useRef(new Animated.Value(0)).current;
+  const contentScale = useRef(new Animated.Value(0.92)).current;
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_evt, gesture) =>
+        Math.abs(gesture.dx) > 12 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.5,
+      onPanResponderMove: Animated.event([null, { dx: translateX }], { useNativeDriver: false }),
+      onPanResponderRelease: (_evt, gesture) => {
+        if (gesture.dx <= -SWIPE_THRESHOLD && nextIdRef.current) {
+          const targetId = nextIdRef.current;
+          Animated.timing(translateX, { toValue: -SCREEN_W, duration: 150, useNativeDriver: false }).start(() => {
+            router.replace(`/monster/${targetId}`);
+          });
+        } else if (gesture.dx >= SWIPE_THRESHOLD && prevIdRef.current) {
+          const targetId = prevIdRef.current;
+          Animated.timing(translateX, { toValue: SCREEN_W, duration: 150, useNativeDriver: false }).start(() => {
+            router.replace(`/monster/${targetId}`);
+          });
+        } else {
+          Animated.spring(translateX, { toValue: 0, useNativeDriver: false, bounciness: 6 }).start();
+        }
+      },
+      onPanResponderTerminate: () => {
+        Animated.spring(translateX, { toValue: 0, useNativeDriver: false, bounciness: 6 }).start();
+      },
+    })
+  ).current;
+
+  useEffect(() => {
+    translateX.setValue(0);
+    // Fade + scale up from behind ("奥から手前に") instead of sliding in
+    // from a side, so it reads the same regardless of swipe direction.
+    contentOpacity.setValue(0);
+    contentScale.setValue(0.92);
+    Animated.parallel([
+      Animated.timing(contentOpacity, { toValue: 1, duration: 260, easing: Easing.out(Easing.cubic), useNativeDriver: false }),
+      Animated.timing(contentScale, { toValue: 1, duration: 260, easing: Easing.out(Easing.cubic), useNativeDriver: false }),
+    ]).start();
+    navigation.setOptions({ title: 'モンスター詳細' });
+    setEditingName(false);
+    setNameDraft(monster?.nickname ?? '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   if (!monster) {
     return (
@@ -101,6 +175,13 @@ export default function MonsterDetailScreen() {
   return (
     <View style={styles.container}>
       <AnimatedBackground />
+      <Animated.View
+        style={[
+          styles.swipeArea,
+          { opacity: contentOpacity, transform: [{ translateX }, { scale: contentScale }] },
+        ]}
+        {...panResponder.panHandlers}
+      >
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
       <View style={styles.header}>
         <MonsterAvatar species={species} size={96} />
@@ -224,6 +305,7 @@ export default function MonsterDetailScreen() {
         <Text style={styles.cooldownNote}>探索クールダウン中: あと {formatDuration(exploreRemaining)}</Text>
       ) : null}
       </ScrollView>
+      </Animated.View>
     </View>
   );
 }
@@ -232,6 +314,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  swipeArea: {
+    flex: 1,
   },
   scroll: {
     flex: 1,

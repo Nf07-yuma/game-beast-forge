@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { View, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
 import { theme } from '@/theme';
+import { useResumingPingPong } from './useResumingAnimation';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
@@ -29,28 +30,7 @@ const STARS = Array.from({ length: STAR_COUNT }, (_, i) => ({
 }));
 
 function FloatingOrb({ orb }: { orb: OrbConfig }) {
-  const progress = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(progress, {
-          toValue: 1,
-          duration: orb.duration,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
-        }),
-        Animated.timing(progress, {
-          toValue: 0,
-          duration: orb.duration,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [progress, orb.duration]);
+  const progress = useResumingPingPong(orb.duration);
 
   const translateX = progress.interpolate({ inputRange: [0, 1], outputRange: [0, orb.rangeX] });
   const translateY = progress.interpolate({ inputRange: [0, 1], outputRange: [0, orb.rangeY] });
@@ -98,18 +78,12 @@ function FloatingOrb({ orb }: { orb: OrbConfig }) {
 }
 
 function TwinkleStar({ star }: { star: (typeof STARS)[number] }) {
-  const opacity = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, { toValue: 1, duration: star.duration, delay: star.delay, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0.15, duration: star.duration, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-      ])
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [opacity, star.delay, star.duration]);
+  const opacity = useResumingPingPong(star.duration, {
+    from: 0.15,
+    to: 1,
+    delay: star.delay,
+    easing: Easing.inOut(Easing.quad),
+  });
 
   return <Animated.View style={[styles.star, { left: star.left, top: star.top, opacity }]} />;
 }
