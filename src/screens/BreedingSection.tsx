@@ -72,7 +72,7 @@ export function BreedingSection() {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>2匹選んで交配しよう</Text>
         <Text style={styles.subtitle}>
           Lv.5以上、クールダウン中でないオスとメスのペアを選択できます

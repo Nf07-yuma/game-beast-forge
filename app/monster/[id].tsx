@@ -182,7 +182,7 @@ export default function MonsterDetailScreen() {
         ]}
         {...panResponder.panHandlers}
       >
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <MonsterAvatar species={species} size={96} />
         {editingName ? (

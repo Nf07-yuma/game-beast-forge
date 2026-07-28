@@ -15,7 +15,7 @@ export function DexSection() {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.progress}>
           {discoveredCount} / {speciesList.length} 種を発見
         </Text>

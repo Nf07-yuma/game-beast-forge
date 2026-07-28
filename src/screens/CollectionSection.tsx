@@ -26,7 +26,7 @@ export function CollectionSection() {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {eggList.length > 0 ? (
           <>
             <Text style={styles.sectionTitle}>タマゴ</Text>

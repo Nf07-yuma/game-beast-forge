@@ -42,7 +42,7 @@ export default function DungeonScreen() {
   return (
     <View style={styles.container}>
       <AnimatedBackground />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>ダンジョン</Text>
         <Text style={styles.subtitle}>
           モンスターを1匹選んで探索に送り出そう。属性に対応した進化石が手に入ることがある。

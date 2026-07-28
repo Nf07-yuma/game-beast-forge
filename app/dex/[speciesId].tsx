@@ -36,7 +36,7 @@ export default function DexDetailScreen() {
   return (
     <View style={styles.container}>
       <AnimatedBackground />
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <MonsterAvatar species={species} size={96} />
           <Text style={styles.dexNo}>{formatDexNo(species.dexNo)}</Text>

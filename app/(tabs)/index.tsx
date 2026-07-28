@@ -116,7 +116,7 @@ export default function MonsterScreen() {
     return (
       <View style={styles.container}>
         <AnimatedBackground />
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           <StarterPicker />
         </ScrollView>
       </View>

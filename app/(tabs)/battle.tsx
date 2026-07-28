@@ -55,7 +55,7 @@ export default function BattleScreen() {
   return (
     <View style={styles.container}>
       <AnimatedBackground />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>2匹選んでバトルしよう</Text>
         <Text style={styles.subtitle}>クールダウン中でないモンスター同士で対戦できます</Text>
 

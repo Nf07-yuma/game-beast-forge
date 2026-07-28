@@ -49,7 +49,7 @@ export default function BattleResultScreen() {
   return (
     <View style={styles.container}>
       <AnimatedBackground />
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
       <Text style={styles.resultBanner}>🏆 {winner.nickname} の勝利！</Text>
 
       <View style={styles.vsRow}>
