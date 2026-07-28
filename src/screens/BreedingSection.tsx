@@ -12,6 +12,7 @@ import { MonsterAvatar } from '@/components/MonsterAvatar';
 import { filterMonstersByElement, sortMonsters } from '@/game/monsterList';
 import { ElementType } from '@/types';
 import { theme, GENDER_SYMBOLS } from '@/theme';
+import { playSfx } from '@/audio/sfx';
 
 export function BreedingSection() {
   const monsters = useGameStore((s) => s.monsters);
@@ -41,6 +42,7 @@ export function BreedingSection() {
     const result = breedMonsters(selected[0], selected[1]);
     Alert.alert(result.ok ? 'こうはい成功' : 'こうはい失敗', result.message);
     if (result.ok) {
+      playSfx('breed');
       setSelected([]);
       if (result.eggId) {
         scheduleHatchReminder(result.eggId, COOLDOWNS.EGG_HATCH_MS).catch(() => {});

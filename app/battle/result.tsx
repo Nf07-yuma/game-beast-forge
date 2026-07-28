@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useGameStore } from '@/store/gameStore';
@@ -9,11 +9,16 @@ import { ProgressBar } from '@/components/ProgressBar';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { theme } from '@/theme';
+import { playSfx } from '@/audio/sfx';
 
 export default function BattleResultScreen() {
   const router = useRouter();
   const battle = useGameStore((s) => s.lastBattle);
   const monsters = useGameStore((s) => s.monsters);
+
+  useEffect(() => {
+    if (battle) playSfx('battleResult');
+  }, [battle]);
 
   if (!battle) {
     return (

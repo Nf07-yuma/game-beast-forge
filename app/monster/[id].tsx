@@ -27,6 +27,7 @@ import { StatBar } from '@/components/StatBar';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { theme, ELEMENT_LABELS, GENDER_LABELS, GENDER_SYMBOLS } from '@/theme';
+import { playSfx } from '@/audio/sfx';
 
 const STAT_DISPLAY_MAX = 60;
 const SCREEN_W = Dimensions.get('window').width;
@@ -143,6 +144,7 @@ export default function MonsterDetailScreen() {
       Alert.alert('できません', result.message);
       return;
     }
+    playSfx('feed');
     scheduleFeedReminder(monster.id, monster.nickname, COOLDOWNS.FEED_MS).catch(() => {});
   }
 
@@ -152,6 +154,7 @@ export default function MonsterDetailScreen() {
       Alert.alert('できません', result.message);
       return;
     }
+    playSfx('train');
     scheduleTrainReminder(monster.id, monster.nickname, COOLDOWNS.TRAIN_MS).catch(() => {});
   }
 
@@ -161,6 +164,7 @@ export default function MonsterDetailScreen() {
       Alert.alert('進化できません', result.message);
       return;
     }
+    playSfx('evolve');
     Alert.alert('進化した！', result.message);
   }
 

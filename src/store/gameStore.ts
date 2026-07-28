@@ -71,6 +71,7 @@ interface ActionResult {
   monsterId?: string;
   eggId?: string;
   rare?: boolean;
+  itemFound?: boolean;
 }
 
 interface GameState {
@@ -85,6 +86,8 @@ interface GameState {
   lastGachaAt: number | null;
   backgroundStyle: BackgroundStyle;
   setBackgroundStyle: (style: BackgroundStyle) => void;
+  soundEnabled: boolean;
+  setSoundEnabled: (enabled: boolean) => void;
   monsterSortKey: MonsterSortKey;
   setMonsterSortKey: (key: MonsterSortKey) => void;
   chooseStarter: (speciesId: string, gender: Gender) => void;
@@ -122,10 +125,15 @@ export const useGameStore = create<GameState>()(
       lastSyncedAt: null,
       lastGachaAt: null,
       backgroundStyle: 'orbs',
+      soundEnabled: true,
       monsterSortKey: 'new',
 
       setBackgroundStyle: (style) => {
         set({ backgroundStyle: style });
+      },
+
+      setSoundEnabled: (enabled) => {
+        set({ soundEnabled: enabled });
       },
 
       setMonsterSortKey: (key) => {
@@ -368,6 +376,7 @@ export const useGameStore = create<GameState>()(
             ? `${monster.nickname}が探索から戻ってきた！${getItem(dungeon.dropItemId).name}を手に入れた！`
             : `${monster.nickname}が探索から戻ってきた。今回は何も見つからなかった…`,
           monsterId,
+          itemFound: gotItem,
         };
       },
 

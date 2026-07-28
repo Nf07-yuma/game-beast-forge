@@ -12,6 +12,7 @@ import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { filterMonstersByElement, sortMonsters } from '@/game/monsterList';
 import { ElementType } from '@/types';
 import { theme } from '@/theme';
+import { playSfx } from '@/audio/sfx';
 
 export default function DungeonScreen() {
   const monsters = useGameStore((s) => s.monsters);
@@ -35,6 +36,7 @@ export default function DungeonScreen() {
     const result = exploreDungeon(selectedMonster, selectedDungeon);
     Alert.alert(result.ok ? '探索結果' : 'できません', result.message);
     if (result.ok) {
+      playSfx(result.itemFound ? 'dungeonFound' : 'dungeonEmpty');
       setSelectedMonster(null);
     }
   }

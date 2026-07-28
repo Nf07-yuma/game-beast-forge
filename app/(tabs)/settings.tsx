@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, Alert, Switch } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useGameStore } from '@/store/gameStore';
 import { isFirebaseConfigured } from '@/cloud/firebase';
@@ -62,6 +62,8 @@ export default function SettingsScreen() {
   const applyCloudData = useGameStore((s) => s.applyCloudData);
   const backgroundStyle = useGameStore((s) => s.backgroundStyle);
   const setBackgroundStyle = useGameStore((s) => s.setBackgroundStyle);
+  const soundEnabled = useGameStore((s) => s.soundEnabled);
+  const setSoundEnabled = useGameStore((s) => s.setSoundEnabled);
   const [syncing, setSyncing] = useState(false);
   const [codeInput, setCodeInput] = useState('');
   const [createPassword, setCreatePassword] = useState('');
@@ -160,6 +162,21 @@ export default function SettingsScreen() {
                 </Pressable>
               );
             })}
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.soundRow}>
+            <View style={styles.soundLabelWrap}>
+              <Text style={styles.sectionTitle}>効果音</Text>
+              <Text style={styles.bgDesc}>エサやり・バトル・ガチャなどの効果音のON/OFF</Text>
+            </View>
+            <Switch
+              value={soundEnabled}
+              onValueChange={setSoundEnabled}
+              trackColor={{ false: theme.colors.surfaceAlt, true: theme.colors.primary }}
+              thumbColor={theme.colors.text}
+            />
           </View>
         </View>
 
@@ -331,6 +348,15 @@ const styles = StyleSheet.create({
     ...theme.textShadow(),
     fontSize: 11,
     lineHeight: 15,
+  },
+  soundRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  soundLabelWrap: {
+    flex: 1,
   },
   notConfigured: {
     color: theme.colors.textMuted,

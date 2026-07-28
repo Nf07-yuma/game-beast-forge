@@ -10,6 +10,7 @@ import { ProgressBar } from '@/components/ProgressBar';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
 import { theme } from '@/theme';
+import { playSfx } from '@/audio/sfx';
 
 export default function EggDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -42,6 +43,7 @@ export default function EggDetailScreen() {
       Alert.alert('まだ孵化しません', result.message);
       return;
     }
+    playSfx('hatch');
     cancelHatchReminder(egg.id).catch(() => {});
     Alert.alert('おめでとう！', result.message, [
       {

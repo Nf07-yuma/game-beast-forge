@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, ViewStyle } from 'react-native';
 import { theme } from '@/theme';
+import { playSfx } from '@/audio/sfx';
 
 interface Props {
   label: string;
@@ -29,9 +30,14 @@ export function PrimaryButton({
 
   const glowColor = variant === 'primary' ? theme.colors.primary : variant === 'danger' ? theme.colors.danger : null;
 
+  function handlePress() {
+    playSfx('tap');
+    onPress();
+  }
+
   return (
     <Pressable
-      onPress={onPress}
+      onPress={handlePress}
       disabled={disabled}
       style={({ pressed }) => [
         styles.button,

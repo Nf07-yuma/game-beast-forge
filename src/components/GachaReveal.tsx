@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Modal, Animated, Easing } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { PrimaryButton } from './PrimaryButton';
 import { theme } from '@/theme';
+import { playSfx } from '@/audio/sfx';
 
 interface Props {
   visible: boolean;
@@ -54,6 +55,7 @@ export function GachaReveal({ visible, rare, message, onClaim }: Props) {
       }),
     ]).start(() => {
       setStage('result');
+      playSfx(rare ? 'gachaRare' : 'gachaReveal');
       Animated.parallel([
         Animated.spring(revealScale, { toValue: 1, friction: 5, tension: 80, useNativeDriver: true }),
         Animated.timing(revealOpacity, { toValue: 1, duration: 200, useNativeDriver: true }),
