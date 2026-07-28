@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { View, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
 import { theme } from '@/theme';
+import { useResumingPingPong, useResumingSawtooth } from './useResumingAnimation';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 const CELL = 34;
@@ -31,24 +32,7 @@ function TravelingPulse({
   duration: number;
   delay: number;
 }) {
-  const progress = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.delay(delay),
-        Animated.timing(progress, {
-          toValue: 1,
-          duration,
-          easing: Easing.linear,
-          useNativeDriver: true,
-        }),
-        Animated.timing(progress, { toValue: 0, duration: 0, useNativeDriver: true }),
-      ])
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [progress, duration, delay]);
+  const progress = useResumingSawtooth(duration, { delay });
 
   const travel = axis === 'horizontal' ? SCREEN_W + 80 : SCREEN_H + 80;
   const translate = progress.interpolate({ inputRange: [0, 1], outputRange: [-80, travel - 80] });
@@ -74,18 +58,7 @@ function TravelingPulse({
 }
 
 function PulseNode({ left, top, delay }: { left: number; top: number; delay: number }) {
-  const glow = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(glow, { toValue: 1, duration: 1300, delay, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-        Animated.timing(glow, { toValue: 0, duration: 1300, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-      ])
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [glow, delay]);
+  const glow = useResumingPingPong(1300, { delay, easing: Easing.inOut(Easing.quad) });
 
   const scale = glow.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1.6] });
   const opacity = glow.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] });
