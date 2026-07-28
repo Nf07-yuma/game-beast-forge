@@ -1,5 +1,16 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
+import React, { useRef, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  Alert,
+  Animated,
+  Easing,
+  PanResponder,
+  Dimensions,
+} from 'react-native';
 import { useGameStore } from '@/store/gameStore';
 import { SPECIES, STARTER_SPECIES_IDS } from '@/data/species';
 import { MonsterAvatar } from '@/components/MonsterAvatar';
@@ -53,15 +64,59 @@ const SECTIONS: { key: Section; label: string }[] = [
   { key: 'dex', label: '図鑑' },
 ];
 
+const SCREEN_W = Dimensions.get('window').width;
+const SWIPE_THRESHOLD = 80;
+
 export default function MonsterScreen() {
   const hasStarter = useGameStore((s) => s.hasStarter);
   const [section, setSection] = useState<Section>('collection');
+  const sectionRef = useRef(section);
+  sectionRef.current = section;
+  const translateX = useRef(new Animated.Value(0)).current;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_evt, gesture) =>
+        Math.abs(gesture.dx) > 12 && Math.abs(gesture.dx) > Math.abs(gesture.dy) * 1.5,
+      onPanResponderMove: Animated.event([null, { dx: translateX }], { useNativeDriver: false }),
+      onPanResponderRelease: (_evt, gesture) => {
+        const currentIndex = SECTIONS.findIndex((s) => s.key === sectionRef.current);
+        const goNext = gesture.dx <= -SWIPE_THRESHOLD && currentIndex < SECTIONS.length - 1;
+        const goPrev = gesture.dx >= SWIPE_THRESHOLD && currentIndex > 0;
+        if (goNext || goPrev) {
+          const targetIndex = goNext ? currentIndex + 1 : currentIndex - 1;
+          const exitTo = goNext ? -SCREEN_W : SCREEN_W;
+          const enterFrom = goNext ? SCREEN_W : -SCREEN_W;
+          Animated.timing(translateX, { toValue: exitTo, duration: 150, useNativeDriver: false }).start(() => {
+            // Relocate to the opposite off-screen edge before swapping content —
+            // both positions are invisible, so this can't flash the old section
+            // back into view the way resetting straight to 0 did. Then slide the
+            // new section in from there instead of popping it in instantly.
+            translateX.setValue(enterFrom);
+            setSection(SECTIONS[targetIndex].key);
+            Animated.timing(translateX, {
+              toValue: 0,
+              duration: 180,
+              easing: Easing.out(Easing.cubic),
+              useNativeDriver: false,
+            }).start();
+          });
+        } else {
+          Animated.spring(translateX, { toValue: 0, useNativeDriver: false, bounciness: 6 }).start();
+        }
+      },
+      onPanResponderTerminate: () => {
+        Animated.spring(translateX, { toValue: 0, useNativeDriver: false, bounciness: 6 }).start();
+      },
+    })
+  ).current;
 
   if (!hasStarter) {
     return (
       <View style={styles.container}>
         <AnimatedBackground />
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           <StarterPicker />
         </ScrollView>
       </View>
@@ -87,9 +142,14 @@ export default function MonsterScreen() {
           </Pressable>
         ))}
       </View>
-      {section === 'collection' ? <CollectionSection /> : null}
-      {section === 'breeding' ? <BreedingSection /> : null}
-      {section === 'dex' ? <DexSection /> : null}
+      <Animated.View
+        style={[styles.swipeArea, { transform: [{ translateX }] }]}
+        {...panResponder.panHandlers}
+      >
+        {section === 'collection' ? <CollectionSection /> : null}
+        {section === 'breeding' ? <BreedingSection /> : null}
+        {section === 'dex' ? <DexSection /> : null}
+      </Animated.View>
     </View>
   );
 }
@@ -102,6 +162,14 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 16,
     paddingBottom: 40,
+  },
+  swipeArea: {
+    flex: 1,
+    // Without this, starting a horizontal drag on top of a <Text> node
+    // (e.g. a monster card's level label) lets the browser begin a native
+    // text-selection drag, which starves the PanResponder of further move
+    // events and the swipe silently stops working past that first pixel.
+    userSelect: 'none',
   },
   switcher: {
     flexDirection: 'row',

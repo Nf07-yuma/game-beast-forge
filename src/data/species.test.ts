@@ -1,4 +1,4 @@
-import { EVOLUTION_TABLE, getSpecies, HYBRID_TABLE, SPECIES, STARTER_SPECIES_IDS } from './species';
+import { EVOLUTION_TABLE, formatDexNo, getSpecies, HYBRID_TABLE, SPECIES, STARTER_SPECIES_IDS } from './species';
 import { ITEMS } from './items';
 
 describe('SPECIES table', () => {
@@ -20,6 +20,13 @@ describe('SPECIES table', () => {
       expect(SPECIES[id]).toBeDefined();
       expect(SPECIES[id].element).not.toBe('mystic');
     }
+  });
+
+  it('gives every species a unique dex number covering 1..N with no gaps', () => {
+    const species = Object.values(SPECIES);
+    const dexNos = species.map((s) => s.dexNo).sort((a, b) => a - b);
+    expect(new Set(dexNos).size).toBe(species.length);
+    expect(dexNos).toEqual(Array.from({ length: species.length }, (_, i) => i + 1));
   });
 
   it('only maps hybrid combos to species that actually exist', () => {
@@ -84,5 +91,12 @@ describe('getSpecies', () => {
 
   it('throws for an unknown id', () => {
     expect(() => getSpecies('does-not-exist')).toThrow();
+  });
+});
+
+describe('formatDexNo', () => {
+  it('zero-pads to at least two digits', () => {
+    expect(formatDexNo(1)).toBe('No.01');
+    expect(formatDexNo(20)).toBe('No.20');
   });
 });

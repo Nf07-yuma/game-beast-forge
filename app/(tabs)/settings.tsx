@@ -136,7 +136,7 @@ export default function SettingsScreen() {
   return (
     <View style={styles.container}>
       <AnimatedBackground />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>設定</Text>
 
         <View style={styles.section}>

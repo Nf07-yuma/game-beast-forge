@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useGameStore } from '@/store/gameStore';
-import { EVOLUTION_TABLE, getSpecies } from '@/data/species';
+import { EVOLUTION_TABLE, formatDexNo, getSpecies } from '@/data/species';
 import { getItem } from '@/data/items';
 import { computeStats, expForLevel, COOLDOWNS } from '@/game/logic';
 import { BATTLE_COOLDOWN_MS } from '@/game/battle';
@@ -182,7 +182,7 @@ export default function MonsterDetailScreen() {
         ]}
         {...panResponder.panHandlers}
       >
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
         <MonsterAvatar species={species} size={96} />
         {editingName ? (
@@ -203,7 +203,7 @@ export default function MonsterDetailScreen() {
         <View style={styles.badgeRow}>
           <View style={[styles.elementBadge, { backgroundColor: species.color + '33' }]}>
             <Text style={[styles.elementText, { color: species.color }]}>
-              {species.name} ・ {ELEMENT_LABELS[species.element]}属性
+              {formatDexNo(species.dexNo)} {species.name} ・ {ELEMENT_LABELS[species.element]}属性
             </Text>
           </View>
           <View
@@ -317,6 +317,11 @@ const styles = StyleSheet.create({
   },
   swipeArea: {
     flex: 1,
+    // Without this, starting a horizontal drag on top of a <Text> node lets
+    // the browser begin a native text-selection drag, which starves the
+    // PanResponder of further move events and the swipe silently stops
+    // working past that first pixel.
+    userSelect: 'none',
   },
   scroll: {
     flex: 1,

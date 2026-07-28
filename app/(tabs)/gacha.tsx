@@ -53,7 +53,7 @@ export default function GachaScreen() {
   return (
     <View style={styles.container}>
       <AnimatedBackground />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>ガチャ</Text>
         <Text style={styles.subtitle}>
           タマゴが1つ手に入る。基本属性（{commonCount}種）は出やすく、希少なハイブリッド種（{rareCount}種）は出にくい。

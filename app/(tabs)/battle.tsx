@@ -6,9 +6,12 @@ import { getSpecies } from '@/data/species';
 import { canBattle } from '@/game/battle';
 import { useNow } from '@/hooks/useNow';
 import { MonsterCard } from '@/components/MonsterCard';
+import { MonsterListControls } from '@/components/MonsterListControls';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { MonsterAvatar } from '@/components/MonsterAvatar';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { filterMonstersByElement, sortMonsters } from '@/game/monsterList';
+import { ElementType } from '@/types';
 import { theme } from '@/theme';
 
 export default function BattleScreen() {
@@ -17,10 +20,14 @@ export default function BattleScreen() {
   const battleMonsters = useGameStore((s) => s.battleMonsters);
   const now = useNow();
   const [selected, setSelected] = useState<string[]>([]);
+  const sortKey = useGameStore((s) => s.monsterSortKey);
+  const setSortKey = useGameStore((s) => s.setMonsterSortKey);
+  const [elementFilter, setElementFilter] = useState<ElementType[]>([]);
 
+  const allMonsters = useMemo(() => Object.values(monsters), [monsters]);
   const monsterList = useMemo(
-    () => Object.values(monsters).sort((a, b) => b.createdAt - a.createdAt),
-    [monsters]
+    () => sortMonsters(filterMonstersByElement(allMonsters, elementFilter), sortKey),
+    [allMonsters, elementFilter, sortKey]
   );
 
   function toggle(id: string) {
@@ -48,7 +55,7 @@ export default function BattleScreen() {
   return (
     <View style={styles.container}>
       <AnimatedBackground />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>2匹選んでバトルしよう</Text>
         <Text style={styles.subtitle}>クールダウン中でないモンスター同士で対戦できます</Text>
 
@@ -85,23 +92,37 @@ export default function BattleScreen() {
         )}
 
         <Text style={styles.sectionTitle}>モンスターを選択</Text>
-        {monsterList.length === 0 ? (
+        {allMonsters.length === 0 ? (
           <Text style={styles.empty}>モンスターがいません</Text>
         ) : (
-          monsterList.map((monster) => {
-            const check = canBattle(monster, now);
-            const isSelected = selected.includes(monster.id);
-            return (
-              <MonsterCard
-                key={monster.id}
-                monster={monster}
-                selected={isSelected}
-                disabled={!check.ok && !isSelected}
-                disabledReason={check.reason}
-                onPress={() => toggle(monster.id)}
-              />
-            );
-          })
+          <>
+            <MonsterListControls
+              sortKey={sortKey}
+              onChangeSort={setSortKey}
+              elementFilter={elementFilter}
+              onChangeElementFilter={setElementFilter}
+            />
+            {monsterList.length === 0 ? (
+              <Text style={styles.empty}>該当するモンスターがいません</Text>
+            ) : (
+              <View style={styles.grid}>
+                {monsterList.map((monster) => {
+                  const check = canBattle(monster, now);
+                  const isSelected = selected.includes(monster.id);
+                  return (
+                    <MonsterCard
+                      key={monster.id}
+                      monster={monster}
+                      selected={isSelected}
+                      disabled={!check.ok && !isSelected}
+                      disabledReason={check.reason}
+                      onPress={() => toggle(monster.id)}
+                    />
+                  );
+                })}
+              </View>
+            )}
+          </>
         )}
       </ScrollView>
     </View>
@@ -142,6 +163,11 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     ...theme.textShadow(),
     fontSize: 13,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
   },
   previewCard: {
     backgroundColor: theme.colors.surface,

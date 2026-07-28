@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useGameStore } from '@/store/gameStore';
-import { SPECIES } from '@/data/species';
+import { formatDexNo, SPECIES } from '@/data/species';
 import { theme } from '@/theme';
 
 export function DexSection() {
@@ -10,12 +10,12 @@ export function DexSection() {
   const monsters = useGameStore((s) => s.monsters);
 
   const discoveredIds = new Set(Object.values(monsters).map((m) => m.speciesId));
-  const speciesList = Object.values(SPECIES);
+  const speciesList = Object.values(SPECIES).sort((a, b) => a.dexNo - b.dexNo);
   const discoveredCount = speciesList.filter((species) => discoveredIds.has(species.id)).length;
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.progress}>
           {discoveredCount} / {speciesList.length} 種を発見
         </Text>
@@ -39,6 +39,7 @@ export function DexSection() {
                 >
                   <Text style={styles.emoji}>{discovered ? species.emoji : '？'}</Text>
                 </View>
+                <Text style={styles.dexNo}>{formatDexNo(species.dexNo)}</Text>
                 <Text style={[styles.name, !discovered && styles.nameUndiscovered]} numberOfLines={1}>
                   {discovered ? species.name : '？？？'}
                 </Text>
@@ -96,6 +97,13 @@ const styles = StyleSheet.create({
   },
   emoji: {
     fontSize: 28,
+  },
+  dexNo: {
+    color: theme.colors.textMuted,
+    ...theme.textShadow(),
+    fontSize: 10,
+    fontWeight: '700',
+    marginBottom: 2,
   },
   name: {
     color: theme.colors.text,
