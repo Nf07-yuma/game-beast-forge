@@ -38,6 +38,9 @@ export const ITEMS: Record<string, Item> = {
   },
 };
 
+/** All evolution stone ids, in a stable order — used for uniform rolls (gacha-less daily bonus, etc.). */
+export const EVOLUTION_STONE_IDS = Object.keys(ITEMS);
+
 export function getItem(itemId: string): Item {
   const item = ITEMS[itemId];
   if (!item) {

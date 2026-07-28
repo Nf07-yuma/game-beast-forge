@@ -16,6 +16,7 @@
 - **ガチャ**: 1時間に1回、タマゴが1つ手に入る抽選を引ける。基本5属性は出やすく、ハイブリッド種（本来は交配でのみ入手可能）は低確率で出る
 - **ダンジョン探索**: モンスターを5つのダンジョン（火山・海底洞窟・大森林・雷鳴の遺跡・岩山、各基本属性1つずつ）のいずれかに送り出すと、EXPと属性に応じた進化石（50%の確率）が手に入る。1匹あたり30分に1回まで
 - **進化**: 基本5属性のモンスターは、Lv.10以上・対応する進化石3個を消費して進化できる（エンバーパップ→エンバーウルフ、アクアフィン→アクアシャーク、リーフリング→リーフモス、スパーキット→サンダーフォックス、ボルダラム→ロックタイタン）。進化するとレベル・なつき度などはそのまま、種族値だけがより強力なものに変わる
+- **ログインボーナス**: コレクション画面の上部から1日1回受け取れる。通常は進化石をランダムで1個、7日連続で受け取ると5属性の進化石を1個ずつまとめて獲得できる。24時間以上あいだが空くと連続日数はリセットされる
 
 ## セットアップ
 
@@ -33,7 +34,7 @@ npm run typecheck   # 型チェック
 npm test             # ユニットテスト（Jest）
 ```
 
-`src/game/logic.ts`（育成・交配のロジック）、`src/game/battle.ts`（バトルロジック）、`src/game/gacha.ts`（ガチャの抽選ロジック）、`src/game/dungeon.ts`（ダンジョン探索のロジック）、`src/game/evolution.ts`（進化条件の判定）、`src/data/species.ts`（種族・進化データ）、`src/data/items.ts`（アイテムデータ）、`src/data/dungeons.ts`（ダンジョンデータ）、`src/store/gameStore.ts`（ゲーム状態のストア）、`src/notifications/index.ts`（通知スケジューリング。`expo-notifications` をモック）、`src/cloud/sync.ts`（同期コードの発行・アップロード・ダウンロード。`firebase/auth`・`firebase/firestore` をモック）に対するユニットテストが `src/**/*.test.ts` にあります。プッシュ・プルリクエスト時には `.github/workflows/ci.yml` により型チェック・テスト・Androidバンドルのビルド確認・APKのビルドが自動実行されます。
+`src/game/logic.ts`（育成・交配のロジック）、`src/game/battle.ts`（バトルロジック）、`src/game/gacha.ts`（ガチャの抽選ロジック）、`src/game/dungeon.ts`（ダンジョン探索のロジック）、`src/game/evolution.ts`（進化条件の判定）、`src/game/dailyBonus.ts`（ログインボーナスの受け取り可否・連続日数・報酬抽選）、`src/data/species.ts`（種族・進化データ）、`src/data/items.ts`（アイテムデータ）、`src/data/dungeons.ts`（ダンジョンデータ）、`src/store/gameStore.ts`（ゲーム状態のストア）、`src/notifications/index.ts`（通知スケジューリング。`expo-notifications` をモック）、`src/cloud/sync.ts`（同期コードの発行・アップロード・ダウンロード。`firebase/auth`・`firebase/firestore` をモック）に対するユニットテストが `src/**/*.test.ts` にあります。プッシュ・プルリクエスト時には `.github/workflows/ci.yml` により型チェック・テスト・Androidバンドルのビルド確認・APKのビルドが自動実行されます。
 
 CIの `build-apk` ジョブは `expo prebuild` でネイティブAndroidプロジェクトを生成し、`./gradlew assembleRelease` で実際に `.apk` をビルドします。成功すると `beast-forge-apk` という名前でワークフロー実行のArtifactsからダウンロードできます（GitHubの Actions タブ → 該当のワークフロー実行 → Artifacts）。JSバンドルがAPKに埋め込まれているため、Metro（開発サーバー）を起動していなくても実機単体でインストール・起動できます。ただし署名は開発用の自動生成キーのため、そのままではPlayストアには提出できません（提出用の正式なリリースビルドは下記の方法をお使いください）。
 
@@ -142,6 +143,7 @@ src/
   game/gacha.ts           ガチャの抽選ロジック（重み付き種族プール）
   game/dungeon.ts          ダンジョン探索のクールダウン・ドロップ判定
   game/evolution.ts        進化条件（レベル・所持アイテム）の判定
+  game/dailyBonus.ts        ログインボーナスの受け取り可否・連続日数・報酬抽選
   store/gameStore.ts      Zustandストア（永続化含む）
   notifications/index.ts   ローカル通知（エサ・トレーニング・孵化リマインダー）
   cloud/firebase.ts        Firebase初期化（未設定なら常にnullを返す）
