@@ -317,6 +317,11 @@ const styles = StyleSheet.create({
   },
   swipeArea: {
     flex: 1,
+    // Without this, starting a horizontal drag on top of a <Text> node lets
+    // the browser begin a native text-selection drag, which starves the
+    // PanResponder of further move events and the swipe silently stops
+    // working past that first pixel.
+    userSelect: 'none',
   },
   scroll: {
     flex: 1,
