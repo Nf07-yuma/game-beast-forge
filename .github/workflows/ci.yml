@@ -79,9 +79,23 @@ jobs:
       # server, so it can't be installed and run standalone. Build the release
       # variant instead: it bundles the JS into the APK itself. This project
       # doesn't have a production keystore configured, so the release build
-      # falls back to signing with the auto-generated debug key (see
-      # signingConfigs.release in android/app/build.gradle after prebuild) —
-      # fine for installing on a test device, not for a Play Store submission.
+      # falls back to signing with the debug key (see signingConfigs.release
+      # in android/app/build.gradle after prebuild) — fine for installing on
+      # a test device, not for a Play Store submission.
+      #
+      # The Android Gradle Plugin auto-generates ~/.android/debug.keystore
+      # with a random key if it's missing, which it always is on a fresh CI
+      # runner. That means every build got a different signature, and Android
+      # refuses to install an update signed by a different key than the one
+      # already on the device — forcing an uninstall (wiping app storage,
+      # including any settings persisted there) before every single install.
+      # Installing a checked-in, stable debug keystore here keeps the
+      # signature identical across builds so installs update in place.
+      - name: Install stable debug keystore
+        run: |
+          mkdir -p ~/.android
+          cp .github/keystores/debug.keystore ~/.android/debug.keystore
+
       - name: Build release APK
         working-directory: android
         run: ./gradlew assembleRelease --no-daemon
