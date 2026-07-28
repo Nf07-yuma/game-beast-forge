@@ -7,6 +7,7 @@ import {
   TextInput,
   Alert,
   Animated,
+  Easing,
   PanResponder,
   Dimensions,
 } from 'react-native';
@@ -60,6 +61,8 @@ export default function MonsterDetailScreen() {
   nextIdRef.current = nextMonster?.id;
 
   const translateX = useRef(new Animated.Value(0)).current;
+  const contentOpacity = useRef(new Animated.Value(0)).current;
+  const contentScale = useRef(new Animated.Value(0.92)).current;
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => false,
@@ -89,6 +92,14 @@ export default function MonsterDetailScreen() {
 
   useEffect(() => {
     translateX.setValue(0);
+    // Fade + scale up from behind ("奥から手前に") instead of sliding in
+    // from a side, so it reads the same regardless of swipe direction.
+    contentOpacity.setValue(0);
+    contentScale.setValue(0.92);
+    Animated.parallel([
+      Animated.timing(contentOpacity, { toValue: 1, duration: 260, easing: Easing.out(Easing.cubic), useNativeDriver: false }),
+      Animated.timing(contentScale, { toValue: 1, duration: 260, easing: Easing.out(Easing.cubic), useNativeDriver: false }),
+    ]).start();
     navigation.setOptions({ title: 'モンスター詳細' });
     setEditingName(false);
     setNameDraft(monster?.nickname ?? '');
@@ -164,7 +175,13 @@ export default function MonsterDetailScreen() {
   return (
     <View style={styles.container}>
       <AnimatedBackground />
-      <Animated.View style={[styles.swipeArea, { transform: [{ translateX }] }]} {...panResponder.panHandlers}>
+      <Animated.View
+        style={[
+          styles.swipeArea,
+          { opacity: contentOpacity, transform: [{ translateX }, { scale: contentScale }] },
+        ]}
+        {...panResponder.panHandlers}
+      >
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
       <View style={styles.header}>
         <MonsterAvatar species={species} size={96} />
