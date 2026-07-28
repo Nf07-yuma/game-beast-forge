@@ -5,6 +5,7 @@ import { useGameStore } from '@/store/gameStore';
 import { MonsterCard } from '@/components/MonsterCard';
 import { MonsterListControls } from '@/components/MonsterListControls';
 import { EggCard } from '@/components/EggCard';
+import { DailyBonusCard } from '@/components/DailyBonusCard';
 import { filterMonstersByElement, sortMonsters } from '@/game/monsterList';
 import { ElementType } from '@/types';
 import { theme } from '@/theme';
@@ -27,6 +28,7 @@ export function CollectionSection() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <DailyBonusCard />
         {eggList.length > 0 ? (
           <>
             <Text style={styles.sectionTitle}>タマゴ</Text>

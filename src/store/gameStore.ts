@@ -32,6 +32,7 @@ import {
 import { GACHA_COOLDOWN_MS, rollGachaSpecies } from '@/game/gacha';
 import { EXPLORE_EXP, canExplore, rollItemDrop } from '@/game/dungeon';
 import { canEvolve } from '@/game/evolution';
+import { canClaimDailyBonus, nextDailyBonusStreak, rollDailyBonusReward, DailyBonusReward } from '@/game/dailyBonus';
 
 function genId(prefix: string): string {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -71,6 +72,8 @@ interface ActionResult {
   monsterId?: string;
   eggId?: string;
   rare?: boolean;
+  streak?: number;
+  rewards?: DailyBonusReward[];
 }
 
 interface GameState {
@@ -83,6 +86,9 @@ interface GameState {
   syncKey: string | null;
   lastSyncedAt: number | null;
   lastGachaAt: number | null;
+  lastDailyBonusAt: number | null;
+  dailyBonusStreak: number;
+  claimDailyBonus: () => ActionResult;
   backgroundStyle: BackgroundStyle;
   setBackgroundStyle: (style: BackgroundStyle) => void;
   monsterSortKey: MonsterSortKey;
@@ -121,6 +127,8 @@ export const useGameStore = create<GameState>()(
       syncKey: null,
       lastSyncedAt: null,
       lastGachaAt: null,
+      lastDailyBonusAt: null,
+      dailyBonusStreak: 0,
       backgroundStyle: 'orbs',
       monsterSortKey: 'new',
 
@@ -392,6 +400,31 @@ export const useGameStore = create<GameState>()(
           ok: true,
           message: `${monster.nickname}は${getSpecies(req.targetId).name}に進化した！`,
           monsterId,
+        };
+      },
+
+      claimDailyBonus: () => {
+        const now = Date.now();
+        const { lastDailyBonusAt, dailyBonusStreak } = get();
+        if (!canClaimDailyBonus(lastDailyBonusAt, now)) {
+          return { ok: false, message: '今日のログインボーナスはもう受け取りました。また明日！' };
+        }
+        const streak = nextDailyBonusStreak(lastDailyBonusAt, dailyBonusStreak, now);
+        const rewards = rollDailyBonusReward(streak);
+        set((state) => ({
+          lastDailyBonusAt: now,
+          dailyBonusStreak: streak,
+          items: rewards.reduce(
+            (acc, r) => ({ ...acc, [r.itemId]: (acc[r.itemId] ?? 0) + r.quantity }),
+            { ...state.items }
+          ),
+        }));
+        const rewardText = rewards.map((r) => `${getItem(r.itemId).name}×${r.quantity}`).join('、');
+        return {
+          ok: true,
+          message: `${streak}日連続ログイン！${rewardText}を手に入れた！`,
+          streak,
+          rewards,
         };
       },
 

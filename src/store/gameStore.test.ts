@@ -35,6 +35,8 @@ beforeEach(() => {
     hasStarter: false,
     lastBattle: null,
     lastGachaAt: null,
+    lastDailyBonusAt: null,
+    dailyBonusStreak: 0,
   });
   jest.useFakeTimers({ advanceTimers: false });
   jest.setSystemTime(new Date('2026-01-01T00:00:00Z'));
@@ -359,5 +361,43 @@ describe('evolveMonster', () => {
     const state = useGameStore.getState();
     expect(state.monsters.m1.speciesId).toBe('emberwolf');
     expect(state.items.fire_stone).toBe(2);
+  });
+});
+
+describe('claimDailyBonus', () => {
+  it('grants a reward, sets the streak to 1, and records the claim time', () => {
+    const result = useGameStore.getState().claimDailyBonus();
+    expect(result.ok).toBe(true);
+    expect(result.streak).toBe(1);
+    expect(result.rewards).toHaveLength(1);
+
+    const state = useGameStore.getState();
+    expect(state.dailyBonusStreak).toBe(1);
+    expect(state.lastDailyBonusAt).toBe(Date.now());
+    const [reward] = result.rewards!;
+    expect(state.items[reward.itemId]).toBe(reward.quantity);
+  });
+
+  it('refuses a second claim on the same day', () => {
+    useGameStore.getState().claimDailyBonus();
+    const result = useGameStore.getState().claimDailyBonus();
+    expect(result.ok).toBe(false);
+    expect(useGameStore.getState().dailyBonusStreak).toBe(1);
+  });
+
+  it('extends the streak on consecutive days and grants a full stone set on day 7', () => {
+    useGameStore.setState({ dailyBonusStreak: 6, lastDailyBonusAt: Date.now() - 24 * 60 * 60 * 1000 });
+    const result = useGameStore.getState().claimDailyBonus();
+    expect(result.ok).toBe(true);
+    expect(result.streak).toBe(7);
+    expect(result.rewards).toHaveLength(Object.keys(useGameStore.getState().items).length);
+    expect(useGameStore.getState().dailyBonusStreak).toBe(7);
+  });
+
+  it('resets the streak after missing more than a day', () => {
+    useGameStore.setState({ dailyBonusStreak: 4, lastDailyBonusAt: Date.now() - 3 * 24 * 60 * 60 * 1000 });
+    const result = useGameStore.getState().claimDailyBonus();
+    expect(result.ok).toBe(true);
+    expect(result.streak).toBe(1);
   });
 });
