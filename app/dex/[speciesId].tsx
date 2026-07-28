@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { useGameStore } from '@/store/gameStore';
-import { SPECIES } from '@/data/species';
+import { formatDexNo, SPECIES } from '@/data/species';
 import { MonsterAvatar } from '@/components/MonsterAvatar';
 import { StatBar } from '@/components/StatBar';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
@@ -39,6 +39,7 @@ export default function DexDetailScreen() {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <MonsterAvatar species={species} size={96} />
+          <Text style={styles.dexNo}>{formatDexNo(species.dexNo)}</Text>
           <Text style={styles.name}>{species.name}</Text>
           <View style={[styles.elementBadge, { backgroundColor: species.color + '33' }]}>
             <Text style={[styles.elementText, { color: species.color }]}>
@@ -86,11 +87,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
   },
+  dexNo: {
+    color: theme.colors.textMuted,
+    ...theme.textShadow(),
+    fontSize: 12,
+    fontWeight: '700',
+    marginTop: 12,
+  },
   name: {
     color: theme.colors.text,
     fontSize: 22,
     fontWeight: '800',
-    marginTop: 12,
+    marginTop: 2,
   },
   elementBadge: {
     paddingHorizontal: 12,

@@ -67,19 +67,21 @@ export default function DungeonScreen() {
         {monsterList.length === 0 ? (
           <Text style={styles.empty}>モンスターがいません</Text>
         ) : (
-          monsterList.map((monster) => {
-            const check = canExplore(monster, now);
-            return (
-              <MonsterCard
-                key={monster.id}
-                monster={monster}
-                selected={selectedMonster === monster.id}
-                disabled={!check.ok}
-                disabledReason={check.reason}
-                onPress={() => setSelectedMonster(monster.id)}
-              />
-            );
-          })
+          <View style={styles.grid}>
+            {monsterList.map((monster) => {
+              const check = canExplore(monster, now);
+              return (
+                <MonsterCard
+                  key={monster.id}
+                  monster={monster}
+                  selected={selectedMonster === monster.id}
+                  disabled={!check.ok}
+                  disabledReason={check.reason}
+                  onPress={() => setSelectedMonster(monster.id)}
+                />
+              );
+            })}
+          </View>
         )}
 
         <PrimaryButton
@@ -128,6 +130,11 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     ...theme.textShadow(),
     fontSize: 13,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
   },
   dungeonCard: {
     flexDirection: 'row',

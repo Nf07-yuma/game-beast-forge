@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useGameStore } from '@/store/gameStore';
-import { EVOLUTION_TABLE, getSpecies } from '@/data/species';
+import { EVOLUTION_TABLE, formatDexNo, getSpecies } from '@/data/species';
 import { getItem } from '@/data/items';
 import { computeStats, expForLevel, COOLDOWNS } from '@/game/logic';
 import { BATTLE_COOLDOWN_MS } from '@/game/battle';
@@ -203,7 +203,7 @@ export default function MonsterDetailScreen() {
         <View style={styles.badgeRow}>
           <View style={[styles.elementBadge, { backgroundColor: species.color + '33' }]}>
             <Text style={[styles.elementText, { color: species.color }]}>
-              {species.name} ・ {ELEMENT_LABELS[species.element]}属性
+              {formatDexNo(species.dexNo)} {species.name} ・ {ELEMENT_LABELS[species.element]}属性
             </Text>
           </View>
           <View

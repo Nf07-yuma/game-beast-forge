@@ -3,6 +3,7 @@ import { Species } from '@/types';
 export const SPECIES: Record<string, Species> = {
   emberpup: {
     id: 'emberpup',
+    dexNo: 1,
     name: 'エンバーパップ',
     element: 'fire',
     emoji: '🐶',
@@ -13,6 +14,7 @@ export const SPECIES: Record<string, Species> = {
   },
   aquafin: {
     id: 'aquafin',
+    dexNo: 2,
     name: 'アクアフィン',
     element: 'water',
     emoji: '🐟',
@@ -23,6 +25,7 @@ export const SPECIES: Record<string, Species> = {
   },
   leafling: {
     id: 'leafling',
+    dexNo: 3,
     name: 'リーフリング',
     element: 'grass',
     emoji: '🐛',
@@ -33,6 +36,7 @@ export const SPECIES: Record<string, Species> = {
   },
   sparkit: {
     id: 'sparkit',
+    dexNo: 4,
     name: 'スパーキット',
     element: 'electric',
     emoji: '🐿️',
@@ -43,6 +47,7 @@ export const SPECIES: Record<string, Species> = {
   },
   boulderam: {
     id: 'boulderam',
+    dexNo: 5,
     name: 'ボルダラム',
     element: 'rock',
     emoji: '🐏',
@@ -53,6 +58,7 @@ export const SPECIES: Record<string, Species> = {
   },
   steamkit: {
     id: 'steamkit',
+    dexNo: 6,
     name: 'スチームキット',
     element: 'mystic',
     emoji: '💨',
@@ -63,6 +69,7 @@ export const SPECIES: Record<string, Species> = {
   },
   bloomvolt: {
     id: 'bloomvolt',
+    dexNo: 7,
     name: 'ブルームボルト',
     element: 'mystic',
     emoji: '🌩️',
@@ -73,6 +80,7 @@ export const SPECIES: Record<string, Species> = {
   },
   magmite: {
     id: 'magmite',
+    dexNo: 8,
     name: 'マグマイト',
     element: 'mystic',
     emoji: '🌋',
@@ -83,6 +91,7 @@ export const SPECIES: Record<string, Species> = {
   },
   ashfern: {
     id: 'ashfern',
+    dexNo: 9,
     name: 'アッシュファーン',
     element: 'mystic',
     emoji: '🦔',
@@ -93,6 +102,7 @@ export const SPECIES: Record<string, Species> = {
   },
   flamespark: {
     id: 'flamespark',
+    dexNo: 10,
     name: 'フレイムスパーク',
     element: 'mystic',
     emoji: '🦅',
@@ -103,6 +113,7 @@ export const SPECIES: Record<string, Species> = {
   },
   suirenturtle: {
     id: 'suirenturtle',
+    dexNo: 11,
     name: 'スイレンタートル',
     element: 'mystic',
     emoji: '🐢',
@@ -113,6 +124,7 @@ export const SPECIES: Record<string, Species> = {
   },
   voltserpent: {
     id: 'voltserpent',
+    dexNo: 12,
     name: 'ボルトサーペント',
     element: 'mystic',
     emoji: '🐍',
@@ -123,6 +135,7 @@ export const SPECIES: Record<string, Species> = {
   },
   tidecrab: {
     id: 'tidecrab',
+    dexNo: 13,
     name: 'タイドクラブ',
     element: 'mystic',
     emoji: '🦀',
@@ -133,6 +146,7 @@ export const SPECIES: Record<string, Species> = {
   },
   mossshell: {
     id: 'mossshell',
+    dexNo: 14,
     name: 'モスシェル',
     element: 'mystic',
     emoji: '🐌',
@@ -143,6 +157,7 @@ export const SPECIES: Record<string, Species> = {
   },
   thunderram: {
     id: 'thunderram',
+    dexNo: 15,
     name: 'サンダーラム',
     element: 'mystic',
     emoji: '🐐',
@@ -153,6 +168,7 @@ export const SPECIES: Record<string, Species> = {
   },
   emberwolf: {
     id: 'emberwolf',
+    dexNo: 16,
     name: 'エンバーウルフ',
     element: 'fire',
     emoji: '🐺',
@@ -163,6 +179,7 @@ export const SPECIES: Record<string, Species> = {
   },
   aquashark: {
     id: 'aquashark',
+    dexNo: 17,
     name: 'アクアシャーク',
     element: 'water',
     emoji: '🦈',
@@ -173,6 +190,7 @@ export const SPECIES: Record<string, Species> = {
   },
   leafmoth: {
     id: 'leafmoth',
+    dexNo: 18,
     name: 'リーフモス',
     element: 'grass',
     emoji: '🦋',
@@ -183,6 +201,7 @@ export const SPECIES: Record<string, Species> = {
   },
   thunderfox: {
     id: 'thunderfox',
+    dexNo: 19,
     name: 'サンダーフォックス',
     element: 'electric',
     emoji: '🦊',
@@ -193,6 +212,7 @@ export const SPECIES: Record<string, Species> = {
   },
   rocktitan: {
     id: 'rocktitan',
+    dexNo: 20,
     name: 'ロックタイタン',
     element: 'rock',
     emoji: '🗿',
@@ -239,4 +259,8 @@ export function getSpecies(speciesId: string): Species {
     throw new Error(`Unknown species: ${speciesId}`);
   }
   return species;
+}
+
+export function formatDexNo(dexNo: number): string {
+  return `No.${String(dexNo).padStart(2, '0')}`;
 }

@@ -26,13 +26,15 @@ export function CollectionSection() {
           </>
         ) : null}
         <Text style={styles.sectionTitle}>モンスター（{monsterList.length}）</Text>
-        {monsterList.map((monster) => (
-          <MonsterCard
-            key={monster.id}
-            monster={monster}
-            onPress={() => router.push(`/monster/${monster.id}`)}
-          />
-        ))}
+        <View style={styles.grid}>
+          {monsterList.map((monster) => (
+            <MonsterCard
+              key={monster.id}
+              monster={monster}
+              onPress={() => router.push(`/monster/${monster.id}`)}
+            />
+          ))}
+        </View>
       </ScrollView>
     </View>
   );
@@ -54,5 +56,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginTop: 8,
     textTransform: 'uppercase',
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
   },
 });

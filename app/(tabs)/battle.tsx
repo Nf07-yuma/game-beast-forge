@@ -88,20 +88,22 @@ export default function BattleScreen() {
         {monsterList.length === 0 ? (
           <Text style={styles.empty}>モンスターがいません</Text>
         ) : (
-          monsterList.map((monster) => {
-            const check = canBattle(monster, now);
-            const isSelected = selected.includes(monster.id);
-            return (
-              <MonsterCard
-                key={monster.id}
-                monster={monster}
-                selected={isSelected}
-                disabled={!check.ok && !isSelected}
-                disabledReason={check.reason}
-                onPress={() => toggle(monster.id)}
-              />
-            );
-          })
+          <View style={styles.grid}>
+            {monsterList.map((monster) => {
+              const check = canBattle(monster, now);
+              const isSelected = selected.includes(monster.id);
+              return (
+                <MonsterCard
+                  key={monster.id}
+                  monster={monster}
+                  selected={isSelected}
+                  disabled={!check.ok && !isSelected}
+                  disabledReason={check.reason}
+                  onPress={() => toggle(monster.id)}
+                />
+              );
+            })}
+          </View>
         )}
       </ScrollView>
     </View>
@@ -142,6 +144,11 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     ...theme.textShadow(),
     fontSize: 13,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
   },
   previewCard: {
     backgroundColor: theme.colors.surface,

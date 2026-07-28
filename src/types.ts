@@ -13,6 +13,8 @@ export interface Stats {
 
 export interface Species {
   id: string;
+  /** National-dex-style entry number shown in the 図鑑 (Pokédex). */
+  dexNo: number;
   name: string;
   element: ElementType;
   emoji: string;

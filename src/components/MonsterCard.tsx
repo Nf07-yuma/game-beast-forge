@@ -1,9 +1,8 @@
 import React from 'react';
 import { Pressable, View, Text, StyleSheet } from 'react-native';
 import { Monster } from '@/types';
-import { getSpecies } from '@/data/species';
+import { formatDexNo, getSpecies } from '@/data/species';
 import { MonsterAvatar } from './MonsterAvatar';
-import { ProgressBar } from './ProgressBar';
 import { theme, ELEMENT_LABELS, GENDER_SYMBOLS } from '@/theme';
 
 interface Props {
@@ -29,77 +28,78 @@ export function MonsterCard({ monster, onPress, selected, disabled, disabledReas
         disabled && styles.cardDisabled,
       ]}
     >
-      <MonsterAvatar species={species} size={56} />
-      <View style={styles.info}>
-        <Text style={styles.name} numberOfLines={1}>
-          {monster.nickname}
-        </Text>
-        <View style={styles.badgeRow}>
-          <View style={[styles.elementBadge, { backgroundColor: species.color + '33' }]}>
-            <Text style={[styles.elementText, { color: species.color }]}>
-              {ELEMENT_LABELS[species.element]}
-            </Text>
-          </View>
-          <Text style={styles.level}>Lv.{monster.level}</Text>
-          <Text
-            style={[
-              styles.gender,
-              { color: monster.gender === 'male' ? theme.colors.male : theme.colors.female },
-            ]}
-          >
-            {GENDER_SYMBOLS[monster.gender]}
+      <MonsterAvatar species={species} size={48} />
+      <Text style={styles.dexNo}>{formatDexNo(species.dexNo)}</Text>
+      <Text style={styles.name} numberOfLines={1}>
+        {monster.nickname}
+      </Text>
+      <View style={styles.badgeRow}>
+        <View style={[styles.elementBadge, { backgroundColor: species.color + '33' }]}>
+          <Text style={[styles.elementText, { color: species.color }]}>
+            {ELEMENT_LABELS[species.element]}
           </Text>
         </View>
-        <View style={styles.affectionRow}>
-          <Text style={styles.heart}>♥</Text>
-          <ProgressBar
-            ratio={monster.affection / 100}
-            color={theme.colors.heart}
-            height={6}
-            style={styles.affectionBar}
-          />
-        </View>
-        {disabled && disabledReason ? (
-          <Text style={styles.disabledReason}>{disabledReason}</Text>
-        ) : null}
+        <Text style={styles.level}>Lv.{monster.level}</Text>
+        <Text
+          style={[
+            styles.gender,
+            { color: monster.gender === 'male' ? theme.colors.male : theme.colors.female },
+          ]}
+        >
+          {GENDER_SYMBOLS[monster.gender]}
+        </Text>
       </View>
+      {disabled && disabledReason ? (
+        <Text style={styles.disabledReason} numberOfLines={2}>
+          {disabledReason}
+        </Text>
+      ) : null}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
+    flexBasis: 150,
+    flexGrow: 1,
+    maxWidth: '48%',
     alignItems: 'center',
     backgroundColor: theme.colors.surface,
     borderRadius: theme.radius.md,
-    padding: 12,
-    marginBottom: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
     borderWidth: 2,
     borderColor: 'transparent',
   },
   cardDisabled: {
     opacity: 0.45,
   },
-  info: {
-    flex: 1,
-    marginLeft: 12,
+  dexNo: {
+    color: theme.colors.textMuted,
+    ...theme.textShadow(),
+    fontSize: 10,
+    fontWeight: '700',
+    marginTop: 6,
   },
   name: {
     color: theme.colors.text,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
+    marginTop: 2,
+    maxWidth: '100%',
   },
   badgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 4,
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    marginTop: 6,
+    gap: 6,
   },
   elementBadge: {
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 10,
-    marginRight: 8,
   },
   elementText: {
     fontSize: 11,
@@ -114,24 +114,11 @@ const styles = StyleSheet.create({
   gender: {
     fontSize: 13,
     fontWeight: '800',
-    marginLeft: 8,
-  },
-  affectionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  heart: {
-    color: theme.colors.heart,
-    fontSize: 12,
-    marginRight: 6,
-  },
-  affectionBar: {
-    flex: 1,
   },
   disabledReason: {
     color: theme.colors.danger,
     fontSize: 11,
-    marginTop: 4,
+    textAlign: 'center',
+    marginTop: 6,
   },
 });
