@@ -6,8 +6,11 @@ import { ITEMS } from '@/data/items';
 import { canExplore } from '@/game/dungeon';
 import { useNow } from '@/hooks/useNow';
 import { MonsterCard } from '@/components/MonsterCard';
+import { MonsterListControls } from '@/components/MonsterListControls';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { filterMonstersByElement, MonsterSortKey, sortMonsters } from '@/game/monsterList';
+import { ElementType } from '@/types';
 import { theme } from '@/theme';
 
 export default function DungeonScreen() {
@@ -17,10 +20,13 @@ export default function DungeonScreen() {
   const now = useNow();
   const [selectedDungeon, setSelectedDungeon] = useState<string | null>(null);
   const [selectedMonster, setSelectedMonster] = useState<string | null>(null);
+  const [sortKey, setSortKey] = useState<MonsterSortKey>('new');
+  const [elementFilter, setElementFilter] = useState<ElementType[]>([]);
 
+  const allMonsters = useMemo(() => Object.values(monsters), [monsters]);
   const monsterList = useMemo(
-    () => Object.values(monsters).sort((a, b) => b.createdAt - a.createdAt),
-    [monsters]
+    () => sortMonsters(filterMonstersByElement(allMonsters, elementFilter), sortKey),
+    [allMonsters, elementFilter, sortKey]
   );
 
   function handleExplore() {
@@ -64,24 +70,36 @@ export default function DungeonScreen() {
         })}
 
         <Text style={styles.sectionTitle}>探索するモンスターを選択</Text>
-        {monsterList.length === 0 ? (
+        {allMonsters.length === 0 ? (
           <Text style={styles.empty}>モンスターがいません</Text>
         ) : (
-          <View style={styles.grid}>
-            {monsterList.map((monster) => {
-              const check = canExplore(monster, now);
-              return (
-                <MonsterCard
-                  key={monster.id}
-                  monster={monster}
-                  selected={selectedMonster === monster.id}
-                  disabled={!check.ok}
-                  disabledReason={check.reason}
-                  onPress={() => setSelectedMonster(monster.id)}
-                />
-              );
-            })}
-          </View>
+          <>
+            <MonsterListControls
+              sortKey={sortKey}
+              onChangeSort={setSortKey}
+              elementFilter={elementFilter}
+              onChangeElementFilter={setElementFilter}
+            />
+            {monsterList.length === 0 ? (
+              <Text style={styles.empty}>該当するモンスターがいません</Text>
+            ) : (
+              <View style={styles.grid}>
+                {monsterList.map((monster) => {
+                  const check = canExplore(monster, now);
+                  return (
+                    <MonsterCard
+                      key={monster.id}
+                      monster={monster}
+                      selected={selectedMonster === monster.id}
+                      disabled={!check.ok}
+                      disabledReason={check.reason}
+                      onPress={() => setSelectedMonster(monster.id)}
+                    />
+                  );
+                })}
+              </View>
+            )}
+          </>
         )}
 
         <PrimaryButton

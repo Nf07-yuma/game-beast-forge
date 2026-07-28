@@ -6,9 +6,12 @@ import { getSpecies } from '@/data/species';
 import { canBattle } from '@/game/battle';
 import { useNow } from '@/hooks/useNow';
 import { MonsterCard } from '@/components/MonsterCard';
+import { MonsterListControls } from '@/components/MonsterListControls';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { MonsterAvatar } from '@/components/MonsterAvatar';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
+import { filterMonstersByElement, MonsterSortKey, sortMonsters } from '@/game/monsterList';
+import { ElementType } from '@/types';
 import { theme } from '@/theme';
 
 export default function BattleScreen() {
@@ -17,10 +20,13 @@ export default function BattleScreen() {
   const battleMonsters = useGameStore((s) => s.battleMonsters);
   const now = useNow();
   const [selected, setSelected] = useState<string[]>([]);
+  const [sortKey, setSortKey] = useState<MonsterSortKey>('new');
+  const [elementFilter, setElementFilter] = useState<ElementType[]>([]);
 
+  const allMonsters = useMemo(() => Object.values(monsters), [monsters]);
   const monsterList = useMemo(
-    () => Object.values(monsters).sort((a, b) => b.createdAt - a.createdAt),
-    [monsters]
+    () => sortMonsters(filterMonstersByElement(allMonsters, elementFilter), sortKey),
+    [allMonsters, elementFilter, sortKey]
   );
 
   function toggle(id: string) {
@@ -85,25 +91,37 @@ export default function BattleScreen() {
         )}
 
         <Text style={styles.sectionTitle}>モンスターを選択</Text>
-        {monsterList.length === 0 ? (
+        {allMonsters.length === 0 ? (
           <Text style={styles.empty}>モンスターがいません</Text>
         ) : (
-          <View style={styles.grid}>
-            {monsterList.map((monster) => {
-              const check = canBattle(monster, now);
-              const isSelected = selected.includes(monster.id);
-              return (
-                <MonsterCard
-                  key={monster.id}
-                  monster={monster}
-                  selected={isSelected}
-                  disabled={!check.ok && !isSelected}
-                  disabledReason={check.reason}
-                  onPress={() => toggle(monster.id)}
-                />
-              );
-            })}
-          </View>
+          <>
+            <MonsterListControls
+              sortKey={sortKey}
+              onChangeSort={setSortKey}
+              elementFilter={elementFilter}
+              onChangeElementFilter={setElementFilter}
+            />
+            {monsterList.length === 0 ? (
+              <Text style={styles.empty}>該当するモンスターがいません</Text>
+            ) : (
+              <View style={styles.grid}>
+                {monsterList.map((monster) => {
+                  const check = canBattle(monster, now);
+                  const isSelected = selected.includes(monster.id);
+                  return (
+                    <MonsterCard
+                      key={monster.id}
+                      monster={monster}
+                      selected={isSelected}
+                      disabled={!check.ok && !isSelected}
+                      disabledReason={check.reason}
+                      onPress={() => toggle(monster.id)}
+                    />
+                  );
+                })}
+              </View>
+            )}
+          </>
         )}
       </ScrollView>
     </View>
