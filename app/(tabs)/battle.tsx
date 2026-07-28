@@ -10,7 +10,7 @@ import { MonsterListControls } from '@/components/MonsterListControls';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { MonsterAvatar } from '@/components/MonsterAvatar';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import { filterMonstersByElement, MonsterSortKey, sortMonsters } from '@/game/monsterList';
+import { filterMonstersByElement, sortMonsters } from '@/game/monsterList';
 import { ElementType } from '@/types';
 import { theme } from '@/theme';
 
@@ -20,7 +20,8 @@ export default function BattleScreen() {
   const battleMonsters = useGameStore((s) => s.battleMonsters);
   const now = useNow();
   const [selected, setSelected] = useState<string[]>([]);
-  const [sortKey, setSortKey] = useState<MonsterSortKey>('new');
+  const sortKey = useGameStore((s) => s.monsterSortKey);
+  const setSortKey = useGameStore((s) => s.setMonsterSortKey);
   const [elementFilter, setElementFilter] = useState<ElementType[]>([]);
 
   const allMonsters = useMemo(() => Object.values(monsters), [monsters]);

@@ -9,7 +9,7 @@ import { MonsterCard } from '@/components/MonsterCard';
 import { MonsterListControls } from '@/components/MonsterListControls';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { MonsterAvatar } from '@/components/MonsterAvatar';
-import { filterMonstersByElement, MonsterSortKey, sortMonsters } from '@/game/monsterList';
+import { filterMonstersByElement, sortMonsters } from '@/game/monsterList';
 import { ElementType } from '@/types';
 import { theme, GENDER_SYMBOLS } from '@/theme';
 
@@ -18,7 +18,8 @@ export function BreedingSection() {
   const breedMonsters = useGameStore((s) => s.breedMonsters);
   const now = useNow();
   const [selected, setSelected] = useState<string[]>([]);
-  const [sortKey, setSortKey] = useState<MonsterSortKey>('new');
+  const sortKey = useGameStore((s) => s.monsterSortKey);
+  const setSortKey = useGameStore((s) => s.setMonsterSortKey);
   const [elementFilter, setElementFilter] = useState<ElementType[]>([]);
 
   const allMonsters = useMemo(() => Object.values(monsters), [monsters]);

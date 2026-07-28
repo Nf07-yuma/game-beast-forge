@@ -5,7 +5,7 @@ import { useGameStore } from '@/store/gameStore';
 import { MonsterCard } from '@/components/MonsterCard';
 import { MonsterListControls } from '@/components/MonsterListControls';
 import { EggCard } from '@/components/EggCard';
-import { filterMonstersByElement, MonsterSortKey, sortMonsters } from '@/game/monsterList';
+import { filterMonstersByElement, sortMonsters } from '@/game/monsterList';
 import { ElementType } from '@/types';
 import { theme } from '@/theme';
 
@@ -13,7 +13,8 @@ export function CollectionSection() {
   const router = useRouter();
   const monsters = useGameStore((s) => s.monsters);
   const eggs = useGameStore((s) => s.eggs);
-  const [sortKey, setSortKey] = useState<MonsterSortKey>('new');
+  const sortKey = useGameStore((s) => s.monsterSortKey);
+  const setSortKey = useGameStore((s) => s.setMonsterSortKey);
   const [elementFilter, setElementFilter] = useState<ElementType[]>([]);
 
   const allMonsters = useMemo(() => Object.values(monsters), [monsters]);

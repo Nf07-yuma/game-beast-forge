@@ -9,7 +9,7 @@ import { MonsterCard } from '@/components/MonsterCard';
 import { MonsterListControls } from '@/components/MonsterListControls';
 import { PrimaryButton } from '@/components/PrimaryButton';
 import { AnimatedBackground } from '@/components/AnimatedBackground';
-import { filterMonstersByElement, MonsterSortKey, sortMonsters } from '@/game/monsterList';
+import { filterMonstersByElement, sortMonsters } from '@/game/monsterList';
 import { ElementType } from '@/types';
 import { theme } from '@/theme';
 
@@ -20,7 +20,8 @@ export default function DungeonScreen() {
   const now = useNow();
   const [selectedDungeon, setSelectedDungeon] = useState<string | null>(null);
   const [selectedMonster, setSelectedMonster] = useState<string | null>(null);
-  const [sortKey, setSortKey] = useState<MonsterSortKey>('new');
+  const sortKey = useGameStore((s) => s.monsterSortKey);
+  const setSortKey = useGameStore((s) => s.setMonsterSortKey);
   const [elementFilter, setElementFilter] = useState<ElementType[]>([]);
 
   const allMonsters = useMemo(() => Object.values(monsters), [monsters]);
